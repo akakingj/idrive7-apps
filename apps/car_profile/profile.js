@@ -33,7 +33,7 @@ const FOLLOW = {
     speedUnit: ['M Vitals', 'Redline', 'Drag Timer', 'Brake Test', 'G-Force', 'AK Cluster'],
     distUnit: ['Brake Test', 'eDrive'],
     tempUnit: ['M Vitals', 'Redline HUD', 'Warm-Up', 'eDrive', 'Transmission Config', 'AK Cluster'],
-    pressUnit: ['M Vitals', 'Redline HUD', 'AK Cluster'],
+    pressUnit: ['M Vitals', 'Redline HUD', 'Live Data', 'AK Cluster'],
     fuelUnit: ['Redline HUD'],
     torqueUnit: ['M Vitals', 'Redline HUD', 'Virtual Dyno', 'AK Cluster'],
     powerUnit: ['M Vitals', 'Redline HUD', 'Virtual Dyno', 'AK Cluster'],

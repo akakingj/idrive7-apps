@@ -251,13 +251,26 @@ mgu.run({
             return active(u, ur) ? usefulOne(u, ur, active(u, ur)) : { s: 'absent' };
         }
         const refusal = (r) => (details() ? 'refused: ' + (NRC[r.nrc] || 'NRC ' + hex(r.nrc)) : 'not available');
+        /**
+         * Pressures in bar shown in Settings' Pressure unit (the Car profile's when it sets it): { k, u, dd } to
+         * multiply a bar value by, its unit and the decimals fewer; null in bar (and for any other unit). Values,
+         * ranges, peaks and traces are kept in bar; only what is shown is converted.
+         */
+        function pressOf(u) {
+            if (u !== 'bar') return null;
+            const p = settings.get('pressUnit');
+            return p === 'psi' ? { k: 14.5038, u: 'psi', dd: 1 } : p === 'kpa' ? { k: 100, u: 'kPa', dd: 2 } : null;
+        }
+        /** a number and its unit as text, a pressure in bar in the pressure unit (no "-0.00") */
+        function numUnit(n, u, d) {
+            const pc = pressOf(u);
+            const s = (pc ? n * pc.k : n).toFixed(pc ? Math.max(0, d - pc.dd) : d);
+            return (/^-0(\.0+)?$/.test(s) ? s.slice(1) : s) + (pc ? ' ' + pc.u : u ? ' ' + u : '');
+        }
         /** what a Useful entry shows: { text, dim, warn } */
         function usefulValue(u, ur) {
             const it = ur.item, v = usefulRaw(u, ur);
-            if (typeof v.n === 'number') {
-                const s = v.n.toFixed(it.d == null ? 2 : it.d);
-                return { text: (/^-0(\.0+)?$/.test(s) ? s.slice(1) : s) + (v.u ? ' ' + v.u : '') };       // no "-0.00"
-            }
+            if (typeof v.n === 'number') return { text: numUnit(v.n, v.u, it.d == null ? 2 : it.d) };
             if (v.text !== undefined) return { text: v.text };
             if (v.bad) return { text: 'no data', dim: true };
             if (v.why) return { text: v.why, dim: true };
@@ -394,8 +407,7 @@ mgu.run({
             if (v.bad) return { text: 'no data', dim: true };
             if (v.text !== undefined) return { text: v.text, dim: !!v.dim };
             if (v.raw) return { text: v.x ? '0x' + hex(v.n, 4) : String(v.n) };
-            const s = v.n.toFixed(it.d == null ? 1 : it.d);
-            return { text: (/^-0(\.0+)?$/.test(s) ? s.slice(1) : s) + (v.u ? ' ' + v.u : '') };
+            return { text: numUnit(v.n, v.u, it.d == null ? 1 : it.d) };
         }
         const sigSource = (it) => (it.tc ? 'trip computer' : it.calc || it.flow ? 'calculated' : SIG.short(it.i) + '.' + it.f) + (it.q ? '  ·  scale?' : it.raw ? '  ·  raw' : '');
         /** the Signals page's rows: group headings and the signals listed */
@@ -666,7 +678,7 @@ mgu.run({
             const x = item(slot.k, slot.fav), v = itemText(x), num = itemNum(x);
             const useful = x.useful ? x.useful.item.name : slot.fav.useful || null;
             const s = { name: ascii(itemName(x)), text: ascii(v.text), dim: !!v.dim, warn: !!v.warn, n: null, u: ascii(slot.fav.u || ''), d: 0 };
-            if (!num) { s.sc = SCR.scale(slot.k, useful, s.u, ranges.get(slot.k) || null); return s; }
+            if (!num) { s.sc = SCR.scale(slot.k, useful, s.u, ranges.get(slot.k) || null); return inPress(s); }
             const now = Date.now(), n = num.n;
             let r = ranges.get(slot.k), p = peaks.get(slot.k), tr = traces.get(slot.k);
             if (!r) ranges.set(slot.k, (r = { lo: n, hi: n }));
@@ -675,7 +687,18 @@ mgu.run({
             if (!tr) traces.set(slot.k, (tr = { t: 0, pts: [] }));
             if (now - tr.t >= TRACE_MS) { tr.t = now; tr.pts.push(n); if (tr.pts.length > TRACE_N) tr.pts.shift(); }
             s.u = ascii(num.u);
-            return Object.assign(s, { n: G.hold('scr|' + slot.k, n, 200), d: num.d, peak: p.v, hist: tr.pts, sc: SCR.scale(slot.k, useful, s.u, r) });
+            return inPress(Object.assign(s, { n: G.hold('scr|' + slot.k, n, 200), d: num.d, peak: p.v, hist: tr.pts, sc: SCR.scale(slot.k, useful, s.u, r) }));
+        }
+        /** a gauge of a pressure in bar in the pressure unit: its number, peak, trace and range (kept in bar) */
+        function inPress(s) {
+            const pc = pressOf(s.u);
+            if (!pc) return s;
+            const k = (x) => (typeof x === 'number' ? x * pc.k : x), sc = s.sc;
+            return Object.assign(s, {
+                u: pc.u, n: k(s.n), peak: k(s.peak), d: Math.max(0, (s.d || 0) - pc.dd), hist: s.hist ? s.hist.map(k) : s.hist,
+                sc: sc && Object.assign({}, sc, { min: k(sc.min), max: k(sc.max), red: k(sc.red),
+                    zones: (sc.zones || []).map((z) => Object.assign({}, z, { from: k(z.from), to: k(z.to) })) }),
+            });
         }
         /** gauge i of screen sc shows choice c ([key, fav] or null: none) */
         function setSlot(sc, i, c) {
