@@ -1675,3 +1675,9 @@ Hybrid Eco Pro	混合动力节能
 Hybrid	混合动力
 Electric	纯电
 Give the HUD back to Cluster functions at switch-off	熄火后把 HUD 交还给 Cluster functions
+Too hot	过热
+Oil is too hot at	机油过热温度
+Coolant is too hot at	冷却液过热温度
+Gearbox is too hot at	变速箱过热温度
+Coolant temp warning	冷却液温度警告
+Gearbox temp warning	变速箱温度警告

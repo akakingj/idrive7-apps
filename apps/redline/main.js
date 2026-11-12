@@ -505,11 +505,11 @@ mgu.run({
             cv.text(mph() ? 'mph' : 'km/h', 46 + vw, 276, 26, t.dim);
             cv.fillRect(40, 298, 300, 1, withAlpha(t.tick, 0.6));
             const warm = settings.get('warmOil'), coldOil = G.isNum(d.oil) && d.oil < warm;
-            const oilCol = !G.isNum(d.oil) ? t.dim : d.oil < 60 ? t.cold : coldOil ? YELLOW : d.oil > 130 ? t.crit : t.text;
+            const oilCol = !G.isNum(d.oil) ? t.dim : d.oil < 60 ? t.cold : coldOil ? YELLOW : d.oil >= (Number(settings.get('hotOil')) || 130) ? t.crit : t.text;
             cv.text('OIL', 40, 334, 22, t.dim, { font: 'bold', spacing: 1.5 });
             cv.text(G.fmt(temp(d.oil), 0) + (G.isNum(d.oil) ? '°' : ''), 40, 376, 40, oilCol, { font: 'bold' });
             cv.text('WATER', 190, 334, 22, t.dim, { font: 'bold', spacing: 1.5 });
-            cv.text(G.fmt(temp(d.coolant), 0) + (G.isNum(d.coolant) ? '°' : ''), 190, 376, 40, t.text, { font: 'bold' });
+            cv.text(G.fmt(temp(d.coolant), 0) + (G.isNum(d.coolant) ? '°' : ''), 190, 376, 40, G.isNum(d.coolant) && d.coolant >= (Number(settings.get('hotCoolant')) || 112) ? t.crit : t.text, { font: 'bold' });
             // cold oil is always shown: with the guard on it also lowers the shift point
             if (coldOil) {
                 cv.roundRect(40, 392, 300, 36, 8, withAlpha(t.cold, 0.2));

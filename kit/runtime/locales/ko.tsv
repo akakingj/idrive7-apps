@@ -2243,3 +2243,9 @@ Show read-only system partitions	읽기 전용 시스템 파티션 표시
 Size units	용량 단위
 GB = 1024 MB (like df -h)	GB = 1024 MB (df -h와 같음)
 GB = 1000 MB	GB = 1000 MB
+Too hot	과열
+Oil is too hot at	엔진오일 과열 온도
+Coolant is too hot at	냉각수 과열 온도
+Gearbox is too hot at	변속기 과열 온도
+Coolant temp warning	냉각수 온도 경고
+Gearbox temp warning	변속기 온도 경고

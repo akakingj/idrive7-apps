@@ -379,6 +379,8 @@ function optsFrom(settings, drive) {
         shake: settings.get('hudShake') === true,
         lights: lights !== 'off', gt3: lights === 'gt3', dim: settings.get('hudUnlit') === 'dim', rev: revOf(settings),
         lightStyle: settings.get('lights'), warmOil: numOf(settings, 'warmOil', 80),
+        // too hot (red) from, °C: Settings > Engine (the Car profile's when it sets them)
+        hotOil: numOf(settings, 'hotOil', 130), hotCoolant: numOf(settings, 'hotCoolant', 112), hotGearbox: numOf(settings, 'hotGearbox', 120),
         mode: on('hudShowMode'),
         // knock (the engine unit's ignition retard): the warning on by default, the readout off
         knock: settings.get('hudShowKnock') === true, knockWarn: settings.get('hudKnockWarn') !== false,
@@ -426,7 +428,9 @@ function calmOpts(o) {
         hvVolt: false, chip: 'off', peak: false, shake: false });
 }
 
-const TEMPS = [['OIL', 'oil', { cold: 60, hot: 130, warmOil: true }], ['WATER', 'coolant', { cold: 60, hot: 112 }], ['GEARBOX', 'gearbox', { cold: 50, hot: 120 }]];
+// cold under, °C; too hot from o[hot] (optsFrom: Settings > Engine), the default where o has none
+const TEMPS = [['OIL', 'oil', { cold: 60, hot: 'hotOil', dflt: 130, warmOil: true }], ['WATER', 'coolant', { cold: 60, hot: 'hotCoolant', dflt: 112 }],
+    ['GEARBOX', 'gearbox', { cold: 50, hot: 'hotGearbox', dflt: 120 }]];
 // boost in the unit chosen: bar (1 decimal), psi or kPa (whole numbers); temperatures in °C or °F
 const BOOST_UNITS = { bar: [1, 1, 'BOOST'], psi: [14.5038, 0, 'BOOST PSI'], kpa: [100, 0, 'BOOST KPA'] };
 // torque from Nm: [factor, label, rounded to] (Nm and lb-ft to 5, kgm to 1); power from kW: [factor, label]
@@ -491,7 +495,8 @@ function readoutsFor(d, gb, boost, sp, o, x) {
         if (!isNum(v)) return;
         const lim = t[2];
         // the bands are in °C whatever is shown
-        const tone = v < lim.cold ? 'cold' : lim.warmOil && v < o.warmOil ? 'warm' : v > lim.hot ? 'hot' : 'text';
+        const hot = isNum(o[lim.hot]) ? o[lim.hot] : lim.dflt;
+        const tone = v < lim.cold ? 'cold' : lim.warmOil && v < o.warmOil ? 'warm' : v >= hot ? 'hot' : 'text';
         if (o.smartTemps && tone === 'text') return;
         items.push({ label: t[0], value: Math.round(o.fahrenheit ? v * 9 / 5 + 32 : v) + '°', tone: tone });
     });

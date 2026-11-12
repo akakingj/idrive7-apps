@@ -101,6 +101,16 @@ ok(r.length === Hud.MAX_READOUTS, 'at most ' + Hud.MAX_READOUTS + ' readouts: ' 
 ok(r.some((it) => it.label === 'OIL' && it.tone === 'cold'), 'a cold oil temperature keeps its place');
 ok(r.some((it) => it.label === 'LIMIT'), 'the cold limit keeps its place');
 ok(!r.some((it) => it.label === 'WATER'), 'water at operating temperature is hidden (smart temps)');
+// too hot from Settings > Engine (the Car profile's hotOil / hotCoolant / hotGearbox): red at that temperature and up
+{
+    const tempsOnly = Object.assign({}, o, { rpm: false, boost: false, torque: false, power: false, throttle: false, g: false, outside: false,
+        oil: true, coolant: true, gearbox: true, smartTemps: false });
+    const tone = (oo, d, gb) => Hud.readoutsFor(d, gb, null, null, oo, {}).map((it) => it.label + ' ' + it.tone).join(', ');
+    ok(tone(tempsOnly, { oil: 129, coolant: 111 }, 119) === 'OIL text, WATER text, GEARBOX text', 'temps under the defaults (130 / 112 / 120): ' + tone(tempsOnly, { oil: 129, coolant: 111 }, 119));
+    ok(tone(tempsOnly, { oil: 130, coolant: 112 }, 120) === 'OIL hot, WATER hot, GEARBOX hot', 'temps at the defaults: red');
+    const own = Object.assign({}, tempsOnly, { hotOil: 125, hotCoolant: 118, hotGearbox: 115 });
+    ok(tone(own, { oil: 126, coolant: 116 }, 116) === 'OIL hot, WATER text, GEARBOX hot', 'temps against Settings\' own: ' + tone(own, { oil: 126, coolant: 116 }, 116));
+}
 r = Hud.readoutsFor({ rpm: 5500 }, null, null, null, Object.assign({}, o, { rpm: false, boost: false, oil: false, coolant: false, gearbox: false, outside: false, throttle: false, g: false, powerUnit: 'kw', torqueUnit: 'nm' }), { torque: 400 });
 ok(JSON.stringify(r) === JSON.stringify([{ label: 'TORQUE', value: '400', tone: 'text' }, { label: 'KW', value: '230', tone: 'text' }]), 'torque Nm and power kW: ' + JSON.stringify(r));
 // kgm: 420 Nm = 42.8 kgm, rounded to 1 (not to 5 as Nm and lb-ft); lb-ft: 420 Nm = 309.8, to 5

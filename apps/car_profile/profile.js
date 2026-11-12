@@ -14,7 +14,7 @@ const fs = require('fs');
 
 // what the profile sets, in Settings order; FOLLOW: the apps that follow each (their app.json "profile")
 const KEYS = ['engine', 'redline', 'shiftBefore', 'rpmScale', 'coldLimit', 'lightMode', 'lightStart', 'coldGuard', 'warmOil',
-    'warmCoolant', 'speedUnit', 'distUnit', 'tempUnit', 'pressUnit', 'fuelUnit', 'torqueUnit', 'powerUnit'];
+    'warmCoolant', 'hotOil', 'hotCoolant', 'hotGearbox', 'speedUnit', 'distUnit', 'tempUnit', 'pressUnit', 'fuelUnit', 'torqueUnit', 'powerUnit'];
 const FOLLOW = {
     engine: ['M Vitals', 'Redline', 'Warm-Up', 'Virtual Dyno'],
     redline: ['M Vitals', 'Redline', 'Warm-Up', 'AK Cluster'],
@@ -26,6 +26,10 @@ const FOLLOW = {
     coldGuard: ['Redline', 'Warm-Up', 'AK Cluster'],
     warmOil: ['Redline', 'Warm-Up', 'AK Cluster'],
     warmCoolant: ['Warm-Up'],
+    // too hot (red) from: each one at that temperature and above
+    hotOil: ['M Vitals', 'Redline', 'Warm-Up', 'AK Cluster'],
+    hotCoolant: ['M Vitals', 'Redline', 'AK Cluster'],
+    hotGearbox: ['M Vitals', 'Redline', 'AK Cluster'],
     speedUnit: ['M Vitals', 'Redline', 'Drag Timer', 'Brake Test', 'G-Force', 'AK Cluster'],
     distUnit: ['Brake Test', 'eDrive'],
     tempUnit: ['M Vitals', 'Redline HUD', 'Warm-Up', 'eDrive', 'Transmission Config', 'AK Cluster'],

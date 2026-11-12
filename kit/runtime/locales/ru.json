@@ -1820,5 +1820,11 @@
   "Hybrid Eco Pro": "Гибрид Эко Про",
   "Hybrid": "Гибрид",
   "Electric": "Электро",
-  "Give the HUD back to Cluster functions at switch-off": "Возвращать HUD приложению Cluster functions при выключении"
+  "Give the HUD back to Cluster functions at switch-off": "Возвращать HUD приложению Cluster functions при выключении",
+  "Too hot": "Перегрев",
+  "Oil is too hot at": "Масло перегрето при",
+  "Coolant is too hot at": "Охлаждающая жидкость перегрета при",
+  "Gearbox is too hot at": "КПП перегрета при",
+  "Coolant temp warning": "Предупреждение о температуре ОЖ",
+  "Gearbox temp warning": "Предупреждение о температуре КПП"
 }

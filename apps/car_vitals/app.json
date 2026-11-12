@@ -2,7 +2,7 @@
   "id": "car_vitals",
   "title": "M Vitals",
   "description": "Live engine, thermal, intake / fuel / ignition, tyre and chassis gauges",
-  "version": "2.27.2",
+  "version": "2.27.3",
   "vendor": "custom",
   "loggingId": "OA93",
   "iconGlyph": "gauge",
@@ -333,18 +333,30 @@
     },
     {
       "key": "oilWarn",
+      "profile": "hotOil",
       "label": "Oil temp warning",
       "type": "number",
       "unit": "°C",
       "default": 125,
-      "steps": [
-        110,
-        115,
-        120,
-        125,
-        130,
-        135
-      ]
+      "steps": [110, 115, 120, 125, 130, 135, 140]
+    },
+    {
+      "key": "coolantWarn",
+      "profile": "hotCoolant",
+      "label": "Coolant temp warning",
+      "type": "number",
+      "unit": "°C",
+      "default": 112,
+      "steps": [105, 108, 110, 112, 115, 118, 120]
+    },
+    {
+      "key": "gearboxWarn",
+      "profile": "hotGearbox",
+      "label": "Gearbox temp warning",
+      "type": "number",
+      "unit": "°C",
+      "default": 120,
+      "steps": [100, 105, 110, 115, 120, 125, 130]
     },
     {
       "key": "flipLong",

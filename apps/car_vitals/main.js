@@ -750,16 +750,18 @@ mgu.run({
         }
 
         function drawThermal(cv, t, d) {
+            // red from Settings' warnings (the Car profile's too-hot temperatures when it sets them)
             const oilWarn = settings.get('oilWarn'), unit = tU();
+            const coolWarn = Number(settings.get('coolantWarn')) || 112, boxWarn = Number(settings.get('gearboxWarn')) || 120;
             const tile = (k, label, zones, color, valueColor) => ({
                 label, value: T(d[k]), unit, zones, color, valueColor, history: hist[k].map(T),
                 sub: d[k] == null ? (usingDemo() ? 'no data' : k === 'egs' && !G.isNum(live.egs) ? fuelWhy('egs') : why(k)) : mm(hist[k], T, 0),
             });
             drawTiles(cv, t, [
-                tile('coolant', 'Coolant', [{ from: T(112), to: 999, color: 'crit' }, { from: -99, to: T(60), color: 'cold' }]),
+                tile('coolant', 'Coolant', [{ from: T(coolWarn), to: 999, color: 'crit' }, { from: -99, to: T(60), color: 'cold' }]),
                 tile('oil', 'Engine oil', [{ from: T(oilWarn), to: 999, color: 'crit' }, { from: -99, to: T(70), color: 'cold', tintOnly: true }], 'oil'),
-                shown('gearbox') && tile('gearbox', 'Gearbox oil', [{ from: T(120), to: 999, color: 'warn' }, { from: -99, to: T(50), color: 'cold' }]),
-                shown('egs') && tile('egs', 'Gearbox (EGS)', [{ from: T(120), to: 999, color: 'warn' }, { from: -99, to: T(50), color: 'cold' }]),
+                shown('gearbox') && tile('gearbox', 'Gearbox oil', [{ from: T(boxWarn), to: 999, color: 'crit' }, { from: -99, to: T(50), color: 'cold' }]),
+                shown('egs') && tile('egs', 'Gearbox (EGS)', [{ from: T(boxWarn), to: 999, color: 'crit' }, { from: -99, to: T(50), color: 'cold' }]),
                 tile('ambient', 'Ambient', [{ from: -99, to: T(3), color: 'cold' }], '#2fd27a', '#2fd27a'),
             ].filter(Boolean));
         }

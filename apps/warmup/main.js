@@ -160,7 +160,7 @@ mgu.run({
             const sp = G.panel(cv, t, 928, 44, 648, 468, null);
             const lim = limit(d.oil);
             const ready = G.isNum(d.oil) && d.oil >= warm;
-            const hot = G.isNum(d.oil) && d.oil > 125;
+            const hot = G.isNum(d.oil) && d.oil >= (Number(settings.get('hotOil')) || 125);      // (Settings: Oil is too hot at)
             const cooling = settings.get('cooldown') && needS > 0;
             let st, col;
             if (!G.isNum(d.oil)) { st = 'NO OIL TEMP'; col = t.dim; }

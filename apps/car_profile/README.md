@@ -14,6 +14,9 @@ One place for the car's engine values and units. Set them here once and the othe
 | Cold-engine rev guard (On / Off) | Redline, Warm-Up, AK Cluster |
 | Oil is warm at | Redline, Warm-Up, AK Cluster |
 | Coolant is warm at | Warm-Up |
+| Oil is too hot at | M Vitals (*Oil temp warning*), Redline (HUD and page), Warm-Up (*OIL HOT*), AK Cluster |
+| Coolant is too hot at | M Vitals (*Coolant temp warning*), Redline (HUD and page), AK Cluster |
+| Gearbox is too hot at | M Vitals (*Gearbox temp warning*), Redline HUD, AK Cluster |
 | Speed unit | M Vitals, Redline, Drag Timer, Brake Test, G-Force, AK Cluster |
 | Distance unit | Brake Test (km -> metres, miles -> feet), eDrive |
 | Temperature unit | M Vitals, Redline HUD, Warm-Up, eDrive, Transmission Config, AK Cluster |
@@ -38,6 +41,14 @@ For every app to show the same numbers, set the redline here: on *Auto* Redline 
 limiter, M Vitals and Warm-Up the engine's (petrol 7000, diesel 5000), the AK Cluster apps their own setting. Redline's
 learned shift point (per gear, setting *Shift point*: learned) is its own; the others use the fixed one.
 
+## One set of too-hot temperatures
+
+The *Too hot* group sets where each app turns the oil, coolant and gearbox temperature red: at that temperature and
+above, the same in every app (M Vitals' tiles, Redline's HUD readouts and the oil and water on its page, Warm-Up's
+*OIL HOT - EASE OFF*, and in AK Cluster the readouts, the temperature gauges' red zones, Centre's Warnings and Info's
+panel). Left at *Each app*, each keeps its own: Redline 130 / 112 / 120 °C, M Vitals 125 / 112 / 120, Warm-Up oil
+125, AK Cluster 130 / 118 / 115. M Vitals' gearbox tiles are red, not amber, from there.
+
 ## How it works
 
 - The app runs from the head unit's start (`autostart`) and writes what is set to `/dev/shm/car-profile.json`
@@ -61,7 +72,7 @@ File format:
 
 Other apps can read the same file: only the values set are in it; unknown names are to be ignored. **AK Cluster**
 (akakingj/idrive7-cluster-info: Cluster Layouts, Centre and Info) does: its red zone and shift point, its cold-engine
-guard and its units follow it the same way. Its shift point is worked out as Redline's fixed one (the redline less
+guard, its too-hot temperatures and its units follow it the same way. Its shift point is worked out as Redline's fixed one (the redline less
 *Shift point before redline*, lowered while the oil is cold from the cold rev limit at 30 °C to normal at *Oil is warm
 at*); Redline's learned per-gear shift point is Redline's own. The profile's *Auto* (0) for the redline, the rev scale
 and the cold rev limit is left to each cluster app's own setting (they have no Auto).
