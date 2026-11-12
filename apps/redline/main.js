@@ -236,13 +236,9 @@ mgu.run({
         engine.onChange(limitsChanged);
         limiter.onChange(limitsChanged);
         /** shift point right now for that gear (lowered while the oil is cold). */
+        // (the kit's, engine.js Engine.coldShift: Warm-Up's rev limit while cold is this same point)
         function shiftPoint(oil, gear) {
-            const n = normalShift(gear);
-            if (!settings.get('coldGuard') || !G.isNum(oil)) return { rpm: n, cold: false };
-            const warm = settings.get('warmOil'), cold = Math.min(engine.value('coldLimit', { diesel: 3000, petrol: 4500 }), n);
-            if (oil >= warm) return { rpm: n, cold: false };
-            const f = G.clamp((oil - 30) / (warm - 30), 0, 1);
-            return { rpm: Math.round((cold + (n - cold) * f) / 50) * 50, cold: true };
+            return Engine.coldShift(normalShift(gear), engine.coldLimit(), oil, settings.get('warmOil'), !!settings.get('coldGuard'));
         }
 
         /* ---------- session state ---------- */

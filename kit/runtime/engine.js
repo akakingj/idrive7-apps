@@ -9,6 +9,9 @@
  *                         to 1000, as before the profiles: 7000 -> 8000, 6000 -> 7000, 5000 -> 6000)
  *   engine.redline()   -> setting "redline" (0 = Auto: the profile's), never above scaleMax()
  *   engine.value('coldLimit', { diesel: 3000, petrol: 4500 })  -> the setting, or per profile when 0
+ *   engine.coldLimit()  -> setting "coldLimit" (0 = Auto: diesel 3000, petrol 4500): the shift point with the oil at 30 °C
+ *   Engine.coldShift(normal, cold, oil, warm, guard) -> { rpm, cold }: the shift point now, lowered while the oil is cold
+ *                       (Redline's; Warm-Up's rev limit while cold and the AK Cluster apps' the same)
  *
  * The profile comes from setting "engine" (auto / diesel / petrol). Auto reads typeEngine from
  * Vehicle2.statusVehiclePartType; the last valid type is kept in data/engine.json so the first
@@ -24,8 +27,9 @@ function writeWhole(file, text) {
     fs.renameSync(tmp, file);
 }
 
-// scaleMax = the Auto scale for the profile's own redline (see scaleMax())
-const PROFILES = { diesel: { scaleMax: 6000, redline: 5000 }, petrol: { scaleMax: 8000, redline: 7000 } };
+// scaleMax = the Auto scale for the profile's own redline (see scaleMax()); coldLimit: the shift point with the oil at
+// 30 °C (Redline's, and Warm-Up's rev limit then: one value for every app, the Car profile's Cold rev limit on Auto)
+const PROFILES = { diesel: { scaleMax: 6000, redline: 5000, coldLimit: 3000 }, petrol: { scaleMax: 8000, redline: 7000, coldLimit: 4500 } };
 // VehicleTypes.TypeEngine, by name or wire number; 0 (no information) / 15 (invalid) = unknown
 const TYPES = {
     4: 'petrol', 5: 'petrol', 6: 'diesel', 7: 'diesel', 8: 'petrol', 9: 'petrol',
@@ -70,6 +74,8 @@ class Engine {
         return typeof v === 'number' && v !== 0 ? v : perProfile[this.profile()];
     }
     _redline() { return this.value('redline', { diesel: PROFILES.diesel.redline, petrol: PROFILES.petrol.redline }); }
+    /** The shift point with the oil at 30 °C: setting "coldLimit", on Auto the profile's (diesel 3000, petrol 4500). */
+    coldLimit() { return this.value('coldLimit', { diesel: PROFILES.diesel.coldLimit, petrol: PROFILES.petrol.coldLimit }); }
     redline() { return Math.min(this._redline(), this.scaleMax()); }
     onChange(fn) { this.listeners.push(fn); }
     _changed(always) {
@@ -79,6 +85,18 @@ class Engine {
         this.listeners.forEach((fn) => { try { fn(); } catch (e) { if (this.log) this.log.error(e); } });
     }
 }
+/**
+ * The shift point now: `normal` (the warm one), with the guard on pulled down while the oil is under `warm`, from `cold`
+ * (never above normal) with the oil at 30 °C rising in a straight line to normal at `warm`, to 50 rpm. Redline's shift
+ * point (setting "coldGuard"); Warm-Up shows it as its rev limit while cold; the AK Cluster apps (idrive7-cluster-info)
+ * work it the same way. -> { rpm, cold } (cold: lowered now).
+ */
+Engine.coldShift = (normal, cold, oil, warm, guard) => {
+    const ok = (v) => typeof v === 'number' && isFinite(v);
+    if (!guard || !ok(oil) || !ok(warm) || oil >= warm) return { rpm: normal, cold: false };
+    const c = Math.min(ok(cold) ? cold : normal, normal), f = Math.max(0, Math.min(1, (oil - 30) / Math.max(1, warm - 30)));
+    return { rpm: Math.round((c + (normal - c) * f) / 50) * 50, cold: true };
+};
 Engine.SIGNAL = ['de.bmw.infotainment.vehicle.Vehicle2', 'statusVehiclePartType'];
 Engine.PROFILES = PROFILES;
 Engine.typeOf = typeOf;

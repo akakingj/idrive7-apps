@@ -2,7 +2,7 @@
   "id": "warmup",
   "title": "Warm-Up",
   "description": "Oil and coolant warm-up calculator (time to ready), safe rev limit and turbo cool-down",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "vendor": "custom",
   "loggingId": "OA9A",
   "iconGlyph": "temp",
@@ -98,6 +98,31 @@
         5000,
         5500
       ]
+    },
+    {
+      "key": "shiftBefore",
+      "profile": "shiftBefore",
+      "label": "Shift point before redline",
+      "type": "number",
+      "unit": "rpm",
+      "default": 300,
+      "steps": [
+        0,
+        100,
+        200,
+        300,
+        500,
+        800,
+        1000
+      ]
+    },
+    {
+      "key": "coldGuard",
+      "profile": "coldGuard",
+      "profileMap": {"on": true, "off": false},
+      "label": "Cold-engine rev guard",
+      "type": "bool",
+      "default": true
     },
     {
       "key": "redline",

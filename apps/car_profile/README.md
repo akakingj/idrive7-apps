@@ -6,12 +6,12 @@ One place for the car's engine values and units. Set them here once and the othe
 |---|---|
 | Engine (Auto / Diesel / Petrol) | M Vitals, Redline, Warm-Up, Virtual Dyno |
 | Redline | M Vitals, Redline, Warm-Up, AK Cluster |
-| Shift point before redline | Redline, AK Cluster |
+| Shift point before redline | Redline, Warm-Up, AK Cluster |
 | Rev scale up to | M Vitals, Redline, Virtual Dyno (*Graph up to*), AK Cluster |
 | Cold rev limit | Redline, Warm-Up, AK Cluster |
 | Shift lights (shift point / rev bar) | Redline |
 | Rev bar from | Redline, AK Cluster Centre (*Shift light: starts at*) |
-| Cold-engine rev guard (On / Off) | Redline, AK Cluster |
+| Cold-engine rev guard (On / Off) | Redline, Warm-Up, AK Cluster |
 | Oil is warm at | Redline, Warm-Up, AK Cluster |
 | Coolant is warm at | Warm-Up |
 | Speed unit | M Vitals, Redline, Drag Timer, Brake Test, G-Force, AK Cluster |
@@ -24,6 +24,19 @@ One place for the car's engine values and units. Set them here once and the othe
 Every setting starts at **Each app**: until it is set here, each app keeps its own setting, so installing the app
 changes nothing. A setting the profile sets shows the profile's value in the other app's Settings and can't be changed
 there (no arrow on its row); set it back to *Each app* here and the app's own value is back.
+
+## One shift point, one rev limit
+
+The apps work the cold engine out the same way (the kit's `engine.js`, `Engine.coldShift`, and the AK Cluster apps
+alike): the **shift point** is the redline less *Shift point before redline*; with the *Cold-engine rev guard* on it is
+pulled down while the oil is colder than *Oil is warm at*, from the *Cold rev limit* with the oil at 30 °C rising in a
+straight line (on *Auto*: diesel 3000, petrol 4500 rpm). Redline flashes there and shows it as its cold *LIMIT*; Warm-Up
+shows the same number as its rev limit while cold (the redline once warm); AK Cluster Centre's shift light (Auto) and
+warm-up page the same; AK Cluster Layouts' red zone starts *Shift point before redline* above it.
+
+For every app to show the same numbers, set the redline here: on *Auto* Redline uses the limit it learned from the
+limiter, M Vitals and Warm-Up the engine's (petrol 7000, diesel 5000), the AK Cluster apps their own setting. Redline's
+learned shift point (per gear, setting *Shift point*: learned) is its own; the others use the fixed one.
 
 ## How it works
 

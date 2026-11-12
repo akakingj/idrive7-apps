@@ -72,11 +72,18 @@ mgu.run({
         const T = (c) => (G.isNum(c) ? (F() ? c * 9 / 5 + 32 : c) : null);
         const tU = () => (F() ? '°F' : '°C');
 
+        /*
+         * The rev limit for now: while the oil is cold the shift point Redline flashes at and shows as its cold LIMIT
+         * (the kit's Engine.coldShift: from the cold limit with the oil at 30 °C up to the redline less "Shift point before
+         * redline" at "Oil is warm at"), the redline once warm or with the cold-engine guard off. The same values the
+         * Car profile gives Redline and the AK Cluster apps.
+         */
         function limit(oil) {
-            const warm = settings.get('warmOil'), red = engine.redline(), cold = Math.min(engine.value('coldLimit', { diesel: 3000, petrol: 3500 }), red);
+            const warm = settings.get('warmOil'), red = engine.redline();
             if (!G.isNum(oil)) return null;
-            if (oil >= warm) return red;
-            return Math.round((cold + (red - cold) * G.clamp((oil - 30) / (warm - 30), 0, 1)) / 100) * 100;
+            const before = Math.max(0, Number(settings.get('shiftBefore')) || 0), guard = settings.get('coldGuard') !== false;
+            const sp = Engine.coldShift(Math.max(2500, red - before), engine.coldLimit(), oil, warm, guard);
+            return sp.cold ? sp.rpm : red;
         }
 
         /** deg C per minute over the last ~3 min (least squares) and the time it covers (ms). */

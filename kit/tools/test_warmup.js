@@ -37,11 +37,12 @@ Module._load = function (req, parent, isMain) {
 
 /** A fresh Warm-Up (a new process); render() draws a frame and returns its texts in order. */
 let render = null;
-async function start() {
+async function start(over) {
     delete require.cache[MAIN];
     require(MAIN);
     const S = {};
     SPEC.settings.forEach((s) => { S[s.key] = s.default; });
+    Object.assign(S, over || {});
     let texts = [], frame = null;
     await app.start({
         ui: { image: async () => {} }, settings: { get: (k) => S[k], onChange() {} }, log: { info() {}, warn() {} },
@@ -95,6 +96,24 @@ const checks = [
         const t = await render();
         assert(t.indexOf('COOLED - OK TO SWITCH OFF') < 0 && t.indexOf('READY') >= 0, 'all clear: ' + t.join(' | '));
     }],
+    ['the rev limit while cold: Redline\'s shift point (the kit\'s Engine.coldShift), the redline once warm', async () => {
+        const Engine = require(path.join(KIT, 'engine'));
+        const set = { engine: 'petrol', redline: 6500, shiftBefore: 400, coldLimit: 4000, warmOil: 85, coldGuard: true };
+        await start(set);
+        for (const oil of [20, 30, 45, 60, 84, 85, 100]) {
+            drive({ rpm: 1500, oil, coolant: 70, speed: 40 }, 1);
+            const t = await render();
+            const shown = t.find((x) => / rpm$/.test(x));
+            const redline = Engine.coldShift(6500 - 400, 4000, oil, 85, true);      // Redline main.js shiftPoint (fixed)
+            assert.strictEqual(shown, (redline.cold ? redline.rpm : 6500) + ' rpm', 'oil ' + oil + ': ' + shown);
+        }
+        await start(Object.assign({}, set, { coldGuard: false }));
+        drive({ rpm: 1500, oil: 30, coolant: 30, speed: 40 }, 1);
+        assert.strictEqual((await render()).find((x) => / rpm$/.test(x)), '6500 rpm', 'guard off: the redline');
+        await start({ engine: 'petrol', coldLimit: 0, redline: 0, warmOil: 80 });
+        drive({ rpm: 1500, oil: 30, coolant: 30, speed: 40 }, 1);
+        assert.strictEqual((await render()).find((x) => / rpm$/.test(x)), '4500 rpm', 'Auto, petrol: 4500 at 30 °C, as Redline\'s');
+    }],
 ];
 
 (async () => {
@@ -103,5 +122,5 @@ const checks = [
         try { await fn(); } catch (e) { failed.push(name); console.error('FAIL ' + name + ': ' + e.message); }
     }
     if (failed.length) process.exit(1);
-    console.log('Warm-Up checks passed (cool-down countdown and "cooled" across wall-clock jumps back and ahead).');
+    console.log('Warm-Up checks passed (cool-down countdown and "cooled" across wall-clock jumps back and ahead; the rev limit as Redline\'s shift point).');
 })().catch((e) => { console.error(e); process.exit(1); });
