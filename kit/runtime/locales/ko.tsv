@@ -2224,6 +2224,25 @@ Directions	길 안내
 Cluster renderer	클러스터 렌더러
 Refresh	새로 고침
 What Redline and the HUD did lately	레드라인과 HUD의 최근 기록
+# Redline 2.0.38 / Ambient config 2.0.5 (upstream 2026-11-11)
+Auto (Barlow on Arc and Dial, squared on Ramp)	자동 (아크·다이얼은 Barlow, 램프는 각진 글꼴)
+Speed (km/h or mph, as Speed unit; on Ramp under the gear)	속도 (속도 단위에 따라 km/h 또는 mph, 램프에서는 단수 아래)
+HUD: waits for the car to be switched on	HUD: 시동이 켜질 때까지 대기
+HUD: off in the settings	HUD: 설정에서 꺼짐
+Nothing to show	표시할 항목 없음
+newest first	최신순
+times UTC	시간은 UTC
+Nothing important in the last	중요한 항목 없음 · 최근
+No log yet in	아직 로그 없음:
+Could not read	읽을 수 없음:
+Apps may not read	앱에서 읽을 수 없음:
+not a file	파일이 아님
+No cluster-render log here (not installed, or an older Cluster renderer)	cluster-render 로그 없음 (미설치 또는 이전 클러스터 렌더러)
+cluster-render started	cluster-render 시작됨
+Another ambient app	다른 앰비언트 앱
+IterioDev's Comfort tool is running. It changes the ambient lights too, so the colours jump between the two apps. Uninstall it in the Store (Installed, Head-unit tools, Comfort) and use one ambient app at a time.	IterioDev의 Comfort 도구가 실행 중입니다. 이 도구도 앰비언트 조명을 바꾸므로 두 앱 사이에서 색이 계속 바뀝니다. Store의 설치됨 → 헤드유닛 도구 → Comfort에서 제거하고 앰비언트 앱은 하나만 사용하세요.
+Left	왼쪽
+Right	오른쪽
 Car profile	차량 프로필
 Each app	각 앱 설정
 Rev bar from	회전수 바 시작
@@ -2233,8 +2252,6 @@ Set for the apps	앱에 적용 중
 Not written for the apps	앱에 적용 안 됨
 Nothing set: each app as it is	설정 없음: 각 앱 그대로
 Profile	프로필
-Auto (Barlow on Arc and Dial, squared on Ramp)	자동 (Arc·Dial은 Barlow, Ramp는 각진 글꼴)
-Speed (km/h or mph, as Speed unit; on Ramp under the gear)	속도 (속도 단위대로 km/h 또는 mph, Ramp에서는 단수 아래)
 Storage	저장 공간
 Disks	디스크
 Apps	앱
@@ -2249,3 +2266,24 @@ Coolant is too hot at	냉각수 과열 온도
 Gearbox is too hot at	변속기 과열 온도
 Coolant temp warning	냉각수 온도 경고
 Gearbox temp warning	변속기 온도 경고
+# Ambient config 2.4.0 / eDrive 2.9.1 (upstream 2026-11-12)
+Turn signal glow	방향지시등 연동 조명
+Open door red	문 열림 빨간색
+High beam strobe and light show (only for use on private property)	상향등 스트로브·라이트 쇼 (사유지에서만 사용)
+Strobe lights	스트로브 조명
+All lights	모든 조명
+High beam	상향등
+Strobe flashes a second	초당 스트로브 깜빡임
+Police flashes a burst	경찰 패턴 한 묶음 깜빡임 수
+Strobe flash length	스트로브 깜빡임 길이
+Police order	경찰 패턴 순서
+Left, both, right	왼쪽, 양쪽, 오른쪽
+Left, right, both	왼쪽, 오른쪽, 양쪽
+Left, right	왼쪽, 오른쪽
+Strobe pattern	스트로브 패턴
+In turn	번갈아
+Strobe speed	스트로브 속도
+Light show speed	라이트 쇼 속도
+Battery power	배터리 출력
+Fast (the car's eDRIVE needle)	빠르게 (차의 eDRIVE 바늘)
+Battery readings only	배터리 측정값만
