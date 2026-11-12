@@ -121,11 +121,13 @@ mgu.run({
          * (blue -> purple -> red at 120 deg C, solid red above); cold / warn / crit zones tint the
          * track, green mark where it counts as warm.
          */
-        function gauge(cv, t, y, h, val, label, warm) {
+        function gauge(cv, t, y, h, val, label, warm, hot) {
             const st = F() ? 18 : 10;
+            // (the oil's red from Oil is too hot at, where OIL HOT shows; the coolant's as before: 135)
+            const crit = G.isNum(hot) ? hot : 135, from = Math.min(120, crit - 5);
             G.segBar(cv, t, 24, y, 880, h, {
                 label, value: T(val), unit: tU(), decimals: 0, min: T(0), max: T(150), step: st, scale: { every: st * 2.5 },
-                zones: [{ from: T(120), to: T(135), color: 'warn' }, { from: T(135), to: T(160), color: 'crit' }],
+                zones: [{ from: T(from), to: T(crit), color: 'warn' }, { from: T(crit), to: T(160), color: 'crit' }],
                 ramp: 'hot', limit: T(120), marks: [{ value: T(warm), color: GO }],
             });
         }
@@ -153,7 +155,7 @@ mgu.run({
             // the room below the page (on the car, with no bar under it): half to each gauge; the coolant
             // panel ends at the page's bottom, and G.panel adds the room back to it
             const room = G.pageBottom(cv) - G.BOTTOM, half = Math.round(room / 2);
-            gauge(cv, t, G.TOP, 225 + half, d.oil, 'Oil', warm);
+            gauge(cv, t, G.TOP, 225 + half, d.oil, 'Oil', warm, Number(settings.get('hotOil')) || 125);
             gauge(cv, t, G.TOP + 242 + half, 225 - half, d.coolant, 'Coolant', warmC);
 
             // ---- status panel

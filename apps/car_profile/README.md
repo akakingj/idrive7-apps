@@ -49,6 +49,9 @@ above, the same in every app (M Vitals' tiles, Redline's HUD readouts and the oi
 panel). Left at *Each app*, each keeps its own: Redline 130 / 112 / 120 °C, M Vitals 125 / 112 / 120, Warm-Up oil
 125, AK Cluster 130 / 118 / 115. M Vitals' gearbox tiles are red, not amber, from there.
 
+A BMW with a map-controlled thermostat runs its coolant hotter at part load (around 105-112 °C) than under full
+load: a coolant value at or under that range turns the coolant red in everyday driving.
+
 ## How it works
 
 - The app runs from the head unit's start (`autostart`) and writes what is set to `/dev/shm/car-profile.json`

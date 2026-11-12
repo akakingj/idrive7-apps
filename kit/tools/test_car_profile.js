@@ -96,6 +96,13 @@ const cases = {
         assert.strictEqual(s.get('redline'), 0);
         assert.strictEqual(s.display('redline'), 'Auto');
     },
+    'Auto (0) to a setting without 0 among its values: left to the app'() {
+        clear();
+        writeProfile({ redline: 0 });
+        const s = settingsIn([{ key: 'redline', label: 'Redline', type: 'number', unit: 'rpm', default: 7000, steps: [6000, 7000], profile: 'redline' }], { redline: 6000 });
+        assert.strictEqual(s.get('redline'), 6000);
+        assert.strictEqual(s.held('redline'), false);
+    },
     'held: not changed in the app'() {
         clear();
         writeProfile({ redline: 6000 });

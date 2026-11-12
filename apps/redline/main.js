@@ -612,7 +612,8 @@ mgu.run({
             let x = (x0 || 40) + (lw || (x0 ? 120 : 160));
             options.forEach((op) => {
                 const w = G.button(cv, t, x, y, 0, 40, op[1], () => { (studio.P || settings).set(key, op[0]); return render(); },
-                    { key: 'studio_' + key + '_' + op[0], primary: op[0] === cur, busy: disabled });
+                    // (one the Car profile sets, the tyre unit: shown as it is, changed in Car profile)
+                    { key: 'studio_' + key + '_' + op[0], primary: op[0] === cur, busy: disabled || (!!settings.held && settings.held(key)) });
                 x += (w || 160) + 12;
             });
         }

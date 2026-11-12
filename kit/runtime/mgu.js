@@ -167,7 +167,9 @@ class Settings {
         if (v === undefined || v === null) return undefined;
         if (s.profileMap && Object.prototype.hasOwnProperty.call(s.profileMap, v)) v = s.profileMap[v];
         if (s.type === 'choice') return (s.options || []).some((o) => o[0] === v) ? v : undefined;
-        if (s.type === 'number') return typeof v === 'number' && isFinite(v) && v >= 0 ? v : undefined;
+        // (0, the profile's Auto, only where it is one of this setting's own values: its steps or a label for it; else
+        // the app's own, as for any value it can't take)
+        if (s.type === 'number') return typeof v === 'number' && isFinite(v) && (v > 0 || (v === 0 && ((!!s.labels && s.labels['0'] !== undefined) || (s.steps || []).indexOf(0) >= 0))) ? v : undefined;
         if (s.type === 'bool') return typeof v === 'boolean' ? v : undefined;
         return undefined;
     }
