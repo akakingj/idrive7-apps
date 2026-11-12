@@ -5,8 +5,10 @@
  *   Disks  each file system the unit has (from its own `df`): free / used / size, a bar coloured
  *          by how full it is; the one the apps are installed on is marked APPS. On the right:
  *          free space for apps and the memory (RAM) in use.
- *   Apps   every installed app's folder under /var/opt/public/oap with the space it takes,
- *          biggest first (walked in the background; "Refresh" walks again).
+ *   Apps   with the Storage helper (kit/storage-helper, a root service from the MGU Store): BMW's own apps and
+ *          the custom apps side by side, each with the space it takes and the total, and the custom tools' folders
+ *          in /var/opt; "Refresh" asks the helper to measure again. Without it: this app's own folder (every app
+ *          runs as its own user and can't open the others'), and where to get the helper.
  *
  * Read-only: the app deletes and changes nothing.
  */
@@ -152,7 +154,54 @@ mgu.run({
             } else cv.text('not available', x + 24, my + 120, 22, t.dim);
         }
 
+        /* ---------- apps from the Storage helper ---------- */
+        let asked = 0;          // when Refresh asked the helper (its answer is newer than this)
+        const KB = 1024;
+        const appName = (a) => a.kind === 'platform' ? 'App platform (MainApp)' : a.title || a.id || a.folder;
+        const ago = (ms) => (ms < 90000 ? 'just now' : ms < 5400000 ? Math.round(ms / 60000) + ' min ago' : Math.round(ms / 3600000) + ' h ago');
+
+        /** One list panel: rows of name, uid, bar and size; what doesn't fit summed in a last row. */
+        function listPanel(cv, t, x, y, w, h, title, rows, extra) {
+            G.panel(cv, t, x, y, w, h, title);
+            const total = rows.reduce((a, r) => a + r.kb, 0);
+            cv.text(rows.length + (rows.length === 1 ? ' app' : ' apps') + '  ·  ' + sz(total * KB), x + w - 24, y + 36, 20, t.dim, { align: 'right', font: 'bold' });
+            const rowH = 34, top = y + 56, n = Math.max(1, Math.floor((h - 64) / rowH));
+            const lines = rows.map((r) => ({ name: appName(r), sub: r.uid, kb: r.kb, own: r.folder === OWN }));
+            if (extra && extra.rows.length) {
+                lines.push({ head: extra.title + '  ·  ' + sz(extra.rows.reduce((a, r) => a + r.kb, 0) * KB) });
+                extra.rows.forEach((r) => lines.push({ name: String(r.path).split('/').pop(), sub: '', kb: r.kb }));
+            }
+            const shownLines = lines.length > n ? lines.slice(0, n - 1) : lines;
+            const max = Math.max(1, rows.concat(extra ? extra.rows : []).reduce((a, r) => Math.max(a, r.kb), 0));
+            shownLines.forEach((l, i) => {
+                const ly = top + i * rowH;
+                if (l.head) { cv.text(l.head, x + 24, ly + 26, 18, t.dim, { font: 'bold', spacing: 1.5 }); return; }
+                if (i % 2 === 1) cv.fillRect(x + 16, ly, w - 32, rowH, t.track);
+                cv.text(fit(cv, l.name + (l.own ? '  (this app)' : ''), 20, w - 330, 'label'), x + 24, ly + 24, 20, t.text);
+                if (l.sub) cv.text(l.sub, x + w - 268, ly + 24, 16, t.dim, { align: 'right' });
+                bar(cv, t, x + w - 254, ly + 14, 100, 7, l.kb / max, t.accent);
+                cv.text(sz(l.kb * KB), x + w - 24, ly + 24, 20, t.text, { align: 'right', font: 'bold' });
+            });
+            if (lines.length > shownLines.length) {
+                const rest = lines.slice(shownLines.length).filter((l) => !l.head);
+                cv.text('+ ' + rest.length + ' more  ·  ' + sz(rest.reduce((a, l) => a + l.kb, 0) * KB), x + 24, top + shownLines.length * rowH + 24, 20, t.dim);
+            }
+        }
+
+        function drawHelperApps(cv, t, d) {
+            const bottom = G.BOTTOM - 26, h = bottom - G.TOP, gap = 16, w = (1552 - gap) / 2;
+            const by = (k) => d.apps.filter((a) => k.indexOf(a.kind) >= 0).sort((a, b) => b.kb - a.kb);
+            listPanel(cv, t, 24, G.TOP, w, h, 'BMW apps', by(['stock', 'platform']));
+            listPanel(cv, t, 24 + w + gap, G.TOP, w, h, 'Custom apps', by(['custom']),
+                { title: 'TOOLS IN /var/opt', rows: (d.tools || []).slice().sort((a, b) => b.kb - a.kb) });
+            const waiting = asked && d.t < asked;
+            const line = waiting ? 'Measuring ...' : 'Measured ' + ago(Date.now() - d.t) + ' by the Storage helper  ·  Refresh measures again';
+            cv.text(line, 1552, G.BOTTOM - 4, 18, waiting ? t.warn : t.dim, { align: 'right' });
+        }
+
         function drawApps(cv, t) {
+            const d = S.helper();
+            if (d) return drawHelperApps(cv, t, d);
             const bottom = G.BOTTOM;
             const L = G.panel(cv, t, 24, G.TOP, 1552, bottom - G.TOP, 'Installed apps');
             const list = apps.list, total = list.reduce((a, r) => a + r.bytes, 0);
@@ -186,7 +235,7 @@ mgu.run({
                 cv.text('+ ' + rest.length + ' more: ' + sz(rest.reduce((a, r) => a + r.bytes, 0)), 48 + c * (colW + 24), top + k * rowH + 28, 22, t.dim);
             }
             // each app runs as a Linux user of its own, its folder 750: another app's folder can't be opened from here
-            const note = closed ? 'No access: each app runs as its own user, so other apps\' folders are closed to this one'
+            const note = closed ? 'No access: apps can\'t open each other\'s folders. Install the Storage helper from the MGU Store to measure every app'
                 : list.some((r) => r.denied && !r.noAccess) ? '* some folders could not be opened: at least this much' : '';
             if (note) cv.text(note, 1552, bottom - 14, 18, t.dim, { align: 'right' });
         }
@@ -195,7 +244,7 @@ mgu.run({
             const now = Date.now();
             // the screen came back or has been open a while: read again
             if (now - lastDraw > 2000 || now - disks.t > DISK_MS) readDisks();
-            if (PAGES[page] === 'apps' && !apps.t && !apps.scanning) scanApps();
+            if (PAGES[page] === 'apps' && !apps.t && !apps.scanning && !S.helper()) scanApps();
             lastDraw = now;
             const t = ctx.theme(), cv = ctx.canvas(W, H).clear(t.bg);
             (PAGES[page] === 'apps' ? drawApps : drawDisks)(cv, t);
@@ -203,7 +252,14 @@ mgu.run({
             await ui.image('MAIN_GFX', cv);
         }
 
-        ui.onClick('BTN_ACTION', () => { readDisks(); if (PAGES[page] === 'apps') { apps.t = 0; scanApps(); } return render(); });
+        ui.onClick('BTN_ACTION', () => {
+            readDisks();
+            if (PAGES[page] === 'apps') {
+                if (S.helper() && S.askHelper()) asked = Date.now();
+                else { apps.t = 0; scanApps(); }
+            }
+            return render();
+        });
         ui.onClick('BTN_PAGE', () => { page = (page + 1) % PAGES.length; return render(); });
         ctx.onTab((i) => { page = i; return render(); });
         settings.onChange((k) => { if (k === 'page') page = Math.max(0, PAGES.indexOf(settings.get('page'))); });

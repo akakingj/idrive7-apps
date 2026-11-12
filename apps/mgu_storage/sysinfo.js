@@ -198,4 +198,30 @@ async function appFolders(root, onProgress) {
     return { list, error: '' };
 }
 
-module.exports = { fileSystems, fsOf, memory, uptime, folderSize, appFolders, parseDf, RAM, VIRTUAL };
+/* ---------- the Storage helper (kit/storage-helper, a root service from the MGU Store) ---------- */
+const HELPER_OUT = process.env.STORAGE_HELPER_OUT || '/run/mgu-storage/apps.json';
+const HELPER_REQUEST = process.env.STORAGE_HELPER_REQUEST || '/dev/shm/mgu-storage-request';
+let helperAt = -1, helperData = null;
+
+/** The helper's last measurement ({ t, took, apps: [{ uid, folder, id, title, kind, kb }], tools }) or null (none). */
+function helper() {
+    let at = 0;
+    try { at = fs.statSync(HELPER_OUT).mtime.getTime(); } catch (e) { at = 0; }
+    if (at === helperAt) return helperData;
+    helperAt = at;
+    helperData = null;
+    if (at) {
+        try {
+            const d = JSON.parse(fs.readFileSync(HELPER_OUT, 'utf8'));
+            if (d && d.v === 1 && Array.isArray(d.apps)) helperData = d;
+        } catch (e) { helperAt = -1; }      // (written whole: a read in the middle of nothing; look again)
+    }
+    return helperData;
+}
+
+/** Ask the helper to measure again now (it looks every 5 s). True when asked. */
+function askHelper() {
+    try { fs.writeFileSync(HELPER_REQUEST, String(Date.now()), { mode: 0o666 }); return true; } catch (e) { return false; }
+}
+
+module.exports = { fileSystems, fsOf, memory, uptime, folderSize, appFolders, parseDf, RAM, VIRTUAL, helper, askHelper };

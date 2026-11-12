@@ -41,6 +41,13 @@
         "checkAfterSeconds": 120,
         "healthySeconds": 60
       }
+    },
+    {
+      "id": "mgu-storage-helper",
+      "path": "kit/storage-helper",
+      "title": "Storage helper",
+      "description": "Measures how much space each app takes (BMW's own and the custom ones) for the Storage app; read only",
+      "mguHmi": ["ID7"]
     }
   ]
 }

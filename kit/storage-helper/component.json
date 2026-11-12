@@ -1,0 +1,23 @@
+{
+  "id": "mgu-storage-helper",
+  "kind": "tool",
+  "version": "1.0.0",
+  "title": "Storage helper",
+  "description": "Measures how much space each app takes, BMW's own and the custom ones, for the Storage app (apps can't open each other's folders). Read only, at the lowest priority: every 30 minutes and on Refresh",
+  "mguHmi": ["ID7"],
+  "optional": true,
+  "uninstallable": true,
+  "requires": { "mgu-deploy": "0.6.1" },
+  "files": [
+    { "path": "mgu-storage-helper.js", "mode": "0644" },
+    { "path": "README.md", "mode": "0644" }
+  ],
+  "units": [
+    { "name": "mgu-storage-helper.service" }
+  ],
+  "enable": [
+    { "unit": "mgu-storage-helper.service", "target": "oapcontroller.service" }
+  ],
+  "restart": ["mgu-storage-helper.service"],
+  "keepRunning": true
+}

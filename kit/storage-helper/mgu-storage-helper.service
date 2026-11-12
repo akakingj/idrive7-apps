@@ -1,0 +1,19 @@
+# Storage helper for the Storage app (idrive7-apps kit/storage-helper), installed from the MGU Store (component.json).
+[Unit]
+Description=Measures each app's space for the Storage app (read only)
+After=oapcontroller.service
+RequiresMountsFor=/var/opt
+
+[Service]
+# root: every app's folder is 750 and owned by that app; it writes only /run/mgu-storage/apps.json
+User=root
+RuntimeDirectory=mgu-storage
+RuntimeDirectoryMode=0755
+ExecStart=/usr/bin/node /var/opt/mgu-storage-helper/current/mgu-storage-helper.js
+Nice=19
+IOSchedulingClass=idle
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=oapcontroller.service
