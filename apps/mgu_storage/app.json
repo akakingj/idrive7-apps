@@ -1,0 +1,36 @@
+{
+  "id": "mgu_storage",
+  "title": "Storage",
+  "description": "How full the head unit is: free space on each of its file systems, memory in use, and how much space each installed app takes",
+  "version": "1.0.1",
+  "vendor": "custom",
+  "loggingId": "OAB1",
+  "iconGlyph": "storage",
+  "signals": {},
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Storage",
+      "buttons": [
+        ["BTN_ACTION", "Refresh"],
+        ["BTN_PAGE", "Next page"],
+        ["BTN_SETTINGS", "Settings"]
+      ]
+    }
+  ],
+  "settings": [
+    {"key": "page", "label": "Start page", "type": "choice", "default": "disks",
+     "options": [["disks", "Disks"], ["apps", "Apps"]]},
+    {"key": "showRam", "label": "Show RAM disks (tmpfs)", "type": "bool", "default": false},
+    {"key": "showRo", "label": "Show read-only system partitions", "type": "bool", "default": true},
+    {"key": "units", "label": "Size units", "type": "choice", "default": "bin",
+     "options": [["bin", "GB = 1024 MB (like df -h)"], ["dec", "GB = 1000 MB"]]},
+    {"key": "theme", "label": "Colour theme", "type": "choice", "default": "m_tricolour",
+     "options": [["m_red", "M Red"], ["m_tricolour", "M Tricolour"], ["ice", "Ice White"], ["amber", "Night Amber"]]},
+    {"key": "layout", "label": "Screen layout", "type": "choice", "default": "full",
+     "options": [["full", "Full screen"], ["standard", "Standard"]]},
+    {"key": "renderer", "label": "Renderer", "type": "choice", "default": "auto",
+     "options": [["auto", "GPU 60 fps (default)"], ["software", "Software"]]}
+  ]
+}

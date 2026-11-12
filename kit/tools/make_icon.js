@@ -111,6 +111,13 @@ if (glyph === 'gauge') {
     c.strokeRoundRect(14, 30, 112, 80, 16, 6, W);
     [[26, '#2a8cff'], [56, '#2fd27a'], [86, A]].forEach(([x, col]) => c.roundRect(x, 58, 28, 10, 5, col));
     c.fillRect(40, 84, 60, 5, W);
+} else if (glyph === 'storage') {
+    // a drive with a fill bar, the red part how full it is (Storage)
+    c.strokeRoundRect(18, 34, 104, 72, 12, 6, W);
+    c.fillRect(32, 84, 76, 10, '#555555');
+    c.fillRect(32, 84, 54, 10, A);
+    c.circle(104, 54, 6, W);
+    c.fillRect(32, 50, 50, 6, W);
 } else if (glyph === 'profile') {
     // the car from the side over three setting sliders, one of them red (Car profile: one place for every app)
     c.convex([[16, 62], [36, 40], [92, 38], [116, 58], [126, 62], [126, 76], [16, 76]], W);

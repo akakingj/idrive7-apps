@@ -2235,3 +2235,11 @@ Nothing set: each app as it is	설정 없음: 각 앱 그대로
 Profile	프로필
 Auto (Barlow on Arc and Dial, squared on Ramp)	자동 (Arc·Dial은 Barlow, Ramp는 각진 글꼴)
 Speed (km/h or mph, as Speed unit; on Ramp under the gear)	속도 (속도 단위대로 km/h 또는 mph, Ramp에서는 단수 아래)
+Storage	저장 공간
+Disks	디스크
+Apps	앱
+Show RAM disks (tmpfs)	RAM 디스크 표시 (tmpfs)
+Show read-only system partitions	읽기 전용 시스템 파티션 표시
+Size units	용량 단위
+GB = 1024 MB (like df -h)	GB = 1024 MB (df -h와 같음)
+GB = 1000 MB	GB = 1000 MB
