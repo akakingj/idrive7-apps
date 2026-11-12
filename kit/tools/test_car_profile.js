@@ -179,7 +179,14 @@ const cases = {
                     // a choice of the profile's ('on' / 'off') to an app's switch: each one mapped to true or false
                     const given = p.options.map((o) => o[0]).filter((v) => v !== 'app');
                     given.forEach((v) => assert(s.profileMap && typeof s.profileMap[v] === 'boolean', app + '.' + s.key + ': the profile\'s ' + v + ' to no true / false'));
-                } else assert.strictEqual(s.type, 'number', app + '.' + s.key);
+                } else {
+                    assert.strictEqual(s.type, 'number', app + '.' + s.key);
+                    // every number the profile can give is one of the setting's own (its drop-down shows it, the HMI's
+                    // list too): 0 only where it is one of them or Auto
+                    const lost = (p.steps || []).filter((v) => v > 0 || (v === 0 && ((s.labels && s.labels['0'] !== undefined) || (s.steps || []).indexOf(0) >= 0)))
+                        .filter((v) => (s.steps || []).indexOf(v) < 0);
+                    assert.deepStrictEqual(lost, [], app + '.' + s.key + ': the profile can give ' + lost.join(', ') + ', not in its list');
+                }
             });
         });
         assert(followers >= 30, 'the apps follow it: ' + followers);
