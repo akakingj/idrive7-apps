@@ -24,10 +24,12 @@
 const fs = require('fs');
 const path = require('path');
 
-/** Write a file whole or not at all: a temp file renamed over it (a reader or a power cut never sees half). */
+/** Write a file whole or not at all: a temp file renamed over it (a reader or a power cut never sees half). Readable by
+ * every app (0644, whatever this process's umask: the others run as users of their own and read what it says). */
 function writeWhole(file, text) {
     const tmp = file + '.' + process.pid + '.tmp';
-    fs.writeFileSync(tmp, text);
+    fs.writeFileSync(tmp, text, { mode: 0o644 });
+    try { fs.chmodSync(tmp, 0o644); } catch (e) { /* the mode given above */ }
     fs.renameSync(tmp, file);
 }
 
