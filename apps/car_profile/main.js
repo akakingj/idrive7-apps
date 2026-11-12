@@ -13,11 +13,13 @@
  * head unit, or at once with "Each app".
  * It runs from the platform's start (app.json "autostart"): the profile is there for the other apps without opening it.
  * Page: the groups with each value and the apps that follow it; in the header, whether anything is set for them.
+ * Each row is a place for the iDrive controller and a tap: pressed, its values' list (kit/sheet.js) over the page.
  */
 const mgu = require('./kit/mgu');
 const G = require('./kit/gauges');
 const { withAlpha } = require('./kit/canvas');
 const P = require('./profile');
+const { listSheet } = require('./kit/sheet');
 
 const W = 1600, H = 520;
 
@@ -42,8 +44,34 @@ mgu.run({
         const { state } = ctx.background || await background(ctx);
         const items = (ctx.spec.settings || []).filter((s) => P.KEYS.indexOf(s.key) >= 0);
 
-        function row(cv, t, x, y, w, s) {
+        /**
+         * A row pressed (the iDrive controller or a tap): its values' list over the page, the one set marked; a
+         * value chosen, or Back, and the page is back. Where the kit can't draw it (another renderer): the HMI's
+         * settings.
+         */
+        function edit(s) {
+            const sh = listSheet(settings, null, { version: ctx.spec.version });
+            const own = settings.schema.find((x) => x.key === s.key) || s;
+            const vals = own.type === 'choice' ? (own.options || []).map((o) => o[0]) : own.steps || [];
+            sh.settings = true;
+            sh.group = own.group || null;
+            sh.focus = Math.max(0, settings.schema.filter((x) => (x.group || null) === sh.group && (!settings.shown || settings.shown(x))).findIndex((x) => x.key === own.key));
+            sh.open = own;
+            sh.sub = Math.max(0, vals.indexOf(settings.get(own.key)));
+            sh.controller = true;
+            let direct = true;      // opened from the page: done with this one value
+            const choose = sh.choose, back = sh.back;
+            sh.choose = function () { const was = direct && !!this.open; const r = choose.call(this); return was ? 'close' : r; };
+            sh.back = function () { if (direct && this.open && !this.child) return 'close'; direct = false; return back.call(this); };
+            sh.onClose = () => render();
+            if (ctx.sheet && ctx.sheet(sh)) return null;
+            return ui.open('SETTINGS');
+        }
+
+        function row(cv, t, x, y, w, s, pitch) {
             const v = settings.get(s.key), on = P.isSet(v);
+            // the whole row: the controller's place (in order down the columns) and a tap
+            cv.target(x - 12, y - 2, w + 24, Math.min(50, pitch - 4), () => edit(s), 'row_' + s.key, 8);
             cv.text(s.label, x, y + 20, 21, t.text);
             cv.text(settings.display(s.key), x + w, y + 20, 23, on ? (t.sel || t.accent) : t.dim, { align: 'right', font: 'bold' });
             const who = (P.FOLLOW[s.key] || []).join(', ');
@@ -63,7 +91,7 @@ mgu.run({
                 panels.forEach(([g, title], k) => {
                     const rows = group(g), last = k === panels.length - 1;
                     const p = G.panel(cv, t, x, y, pw, last ? bottom - y : 64 + rows.length * pitch, title);
-                    rows.forEach((s, j) => row(cv, t, p.x + 22, p.y + 58 + j * pitch, p.w - 44, s));
+                    rows.forEach((s, j) => row(cv, t, p.x + 22, p.y + 58 + j * pitch, p.w - 44, s, pitch));
                     y = p.y + p.h + gap;
                 });
             };
