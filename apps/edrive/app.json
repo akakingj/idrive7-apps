@@ -281,6 +281,7 @@
     },
     {
       "key": "distUnit",
+      "profile": "distUnit",
       "label": "Distance unit",
       "type": "choice",
       "default": "km",
@@ -297,6 +298,7 @@
     },
     {
       "key": "tempUnit",
+      "profile": "tempUnit",
       "label": "Temperature unit",
       "type": "choice",
       "default": "c",

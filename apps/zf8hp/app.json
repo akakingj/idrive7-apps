@@ -125,6 +125,7 @@
     },
     {
       "key": "tempUnit",
+      "profile": "tempUnit",
       "label": "Temperature unit",
       "type": "choice",
       "default": "c",

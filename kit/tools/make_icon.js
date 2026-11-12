@@ -111,6 +111,15 @@ if (glyph === 'gauge') {
     c.strokeRoundRect(14, 30, 112, 80, 16, 6, W);
     [[26, '#2a8cff'], [56, '#2fd27a'], [86, A]].forEach(([x, col]) => c.roundRect(x, 58, 28, 10, 5, col));
     c.fillRect(40, 84, 60, 5, W);
+} else if (glyph === 'profile') {
+    // the car from the side over three setting sliders, one of them red (Car profile: one place for every app)
+    c.convex([[16, 62], [36, 40], [92, 38], [116, 58], [126, 62], [126, 76], [16, 76]], W);
+    c.circle(42, 78, 11, '#000000'); c.circle(42, 78, 8, W);
+    c.circle(102, 78, 11, '#000000'); c.circle(102, 78, 8, W);
+    [[98, 50], [111, 92], [124, 68]].forEach(([y, x], i) => {
+        c.fillRect(20, y, 100, 4, W);
+        c.circle(x, y + 2, 6, i === 1 ? A : W);
+    });
 } else {
     c.strokeRoundRect(14, 14, 112, 112, 22, 6, W);
     c.text(glyph, 70, 88, 56, W, { font: 'bold', align: 'center' });

@@ -107,6 +107,7 @@
     },
     {
       "key": "tempUnit",
+      "profile": "tempUnit",
       "label": "Temperature unit",
       "type": "choice",
       "default": "c",
@@ -115,6 +116,7 @@
     },
     {
       "key": "pressUnit",
+      "profile": "pressUnit",
       "label": "Pressure unit",
       "type": "choice",
       "default": "bar",
@@ -147,6 +149,7 @@
     },
     {
       "key": "speedUnit",
+      "profile": "speedUnit",
       "label": "Speed unit",
       "type": "choice",
       "default": "kmh",
@@ -163,6 +166,7 @@
     },
     {
       "key": "engine",
+      "profile": "engine",
       "label": "Engine",
       "type": "choice",
       "default": "auto",
@@ -174,6 +178,7 @@
     },
     {
       "key": "redline",
+      "profile": "redline",
       "label": "Redline",
       "type": "number",
       "unit": "rpm",
@@ -202,6 +207,7 @@
     },
     {
       "key": "rpmScale",
+      "profile": "rpmScale",
       "label": "Rev scale up to",
       "type": "number",
       "unit": "rpm",
@@ -269,6 +275,7 @@
     },
     {
       "key": "powerUnit",
+      "profile": "powerUnit",
       "label": "Power unit",
       "type": "choice",
       "default": "kw",
@@ -289,6 +296,7 @@
     },
     {
       "key": "torqueUnit",
+      "profile": "torqueUnit",
       "label": "Torque unit",
       "type": "choice",
       "default": "nm",

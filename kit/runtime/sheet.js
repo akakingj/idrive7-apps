@@ -128,6 +128,8 @@ function listSheet(settings, title, opts) {
         if (!group) extra().forEach((x) => out.push({ extra: x }));
         return out;
     };
+    // a setting the Car profile app sets now: its value shown, not changed here (mgu.js Settings.held)
+    const held = (s) => !!(s && s.key && settings.held && settings.held(s.key));
     const sh = {
         title: title || 'Settings',
         focus: 0, open: null, sub: 0,        // open: the setting whose values are listed
@@ -142,7 +144,7 @@ function listSheet(settings, title, opts) {
             return entries(this.group).map((s) => (s.extra ? { label: s.extra.label, value: valueOf(s.extra), kind: 'more' }
                 : s.group && !s.key ? { label: s.group, kind: 'more' }
                 : s.type === 'bool' ? { label: s.label, kind: 'toggle', on: !!settings.get(s.key) }
-                    : { label: s.label, value: settings.display(s.key), kind: values(s) ? 'more' : null }));
+                    : { label: s.label, value: settings.display(s.key), kind: values(s) && !held(s) ? 'more' : null }));
         },
         draw(r, t) {
             // (its taps through fromChild too, so its Back / 'close' comes back here)
@@ -205,6 +207,7 @@ function listSheet(settings, title, opts) {
             // (an open() that throws leaves the settings as they are; display.js logs it)
             if (s.extra) { const c = s.extra.open && s.extra.open(); if (c) this.child = c; return null; }
             if (s.group && !s.key) { this.group = s.group; this.gfocus = this.focus; this.focus = 0; return null; }
+            if (held(s)) return null;      // the Car profile sets it (Settings.held): changed in Car profile
             if (s.type === 'bool') settings.set(s.key, !settings.get(s.key));
             else if (values(s)) {
                 this.open = s;

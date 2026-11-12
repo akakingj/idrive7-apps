@@ -1,0 +1,38 @@
+{
+  "id": "car_profile",
+  "title": "Car profile",
+  "description": "One place for the car's engine values and units: the redline, rev scale, cold rev limit, shift lights, warm-up temperatures and the speed, distance, temperature, pressure, fuel use, torque and power units. M Vitals, Redline, Warm-Up, Virtual Dyno, Drag Timer, Brake Test, G-Force, eDrive and Transmission Config follow them; what is left to each app stays as each app has it",
+  "version": "1.0.0",
+  "vendor": "custom",
+  "loggingId": "OAA9",
+  "iconGlyph": "profile",
+  "autostart": true,
+  "signals": {},
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Car profile",
+      "buttons": [
+        ["BTN_SETTINGS", "Settings"]
+      ]
+    }
+  ],
+  "settings": [
+    {"key": "engine", "label": "Engine", "type": "choice", "default": "app", "options": [["app", "Each app"], ["auto", "Auto (from the car)"], ["diesel", "Diesel"], ["petrol", "Petrol"]], "group": "Engine"},
+    {"key": "redline", "label": "Redline", "type": "number", "unit": "rpm", "default": -1, "labels": {"-1": "Each app", "0": "Auto"}, "steps": [-1, 0, 4000, 4500, 5000, 5500, 5800, 6000, 6200, 6500, 6800, 7000, 7200, 7500, 7800, 8000, 8500, 9000], "group": "Engine"},
+    {"key": "rpmScale", "label": "Rev scale up to", "type": "number", "unit": "rpm", "default": -1, "labels": {"-1": "Each app", "0": "Auto"}, "steps": [-1, 0, 5000, 6000, 7000, 8000, 9000, 10000], "group": "Engine"},
+    {"key": "coldLimit", "label": "Cold rev limit", "type": "number", "unit": "rpm", "default": -1, "labels": {"-1": "Each app", "0": "Auto"}, "steps": [-1, 0, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500], "group": "Engine"},
+    {"key": "lightMode", "label": "Shift lights", "type": "choice", "default": "app", "options": [["app", "Each app"], ["shift", "Shift point"], ["rev", "Rev bar"]], "group": "Engine"},
+    {"key": "lightStart", "label": "Rev bar from", "type": "number", "unit": "rpm", "default": -1, "labels": {"-1": "Each app"}, "steps": [-1, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000], "group": "Engine"},
+    {"key": "warmOil", "label": "Oil is warm at", "type": "number", "unit": "°C", "default": -1, "labels": {"-1": "Each app"}, "steps": [-1, 60, 70, 75, 80, 85, 90, 100], "group": "Warm-up"},
+    {"key": "warmCoolant", "label": "Coolant is warm at", "type": "number", "unit": "°C", "default": -1, "labels": {"-1": "Each app"}, "steps": [-1, 60, 70, 75, 80, 85, 90], "group": "Warm-up"},
+    {"key": "speedUnit", "label": "Speed unit", "type": "choice", "default": "app", "options": [["app", "Each app"], ["kmh", "km/h"], ["mph", "mph"]], "group": "Units"},
+    {"key": "distUnit", "label": "Distance unit", "type": "choice", "default": "app", "options": [["app", "Each app"], ["km", "km"], ["mi", "miles"]], "group": "Units"},
+    {"key": "tempUnit", "label": "Temperature unit", "type": "choice", "default": "app", "options": [["app", "Each app"], ["c", "Celsius"], ["f", "Fahrenheit"]], "group": "Units"},
+    {"key": "pressUnit", "label": "Pressure unit", "type": "choice", "default": "app", "options": [["app", "Each app"], ["bar", "bar"], ["psi", "psi"], ["kpa", "kPa"]], "group": "Units"},
+    {"key": "fuelUnit", "label": "Fuel use unit", "type": "choice", "default": "app", "options": [["app", "Each app"], ["l100", "l/100 km"], ["kml", "km/l"], ["mpguk", "mpg (UK)"], ["mpgus", "mpg (US)"]], "group": "Units"},
+    {"key": "torqueUnit", "label": "Torque unit", "type": "choice", "default": "app", "options": [["app", "Each app"], ["nm", "Nm"], ["lbft", "lb-ft"], ["kgm", "kgm"]], "group": "Units"},
+    {"key": "powerUnit", "label": "Power unit", "type": "choice", "default": "app", "options": [["app", "Each app"], ["hp", "hp"], ["ps", "PS"], ["kw", "kW"]], "group": "Units"}
+  ]
+}
