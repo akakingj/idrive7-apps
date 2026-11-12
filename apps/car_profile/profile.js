@@ -13,25 +13,28 @@
 const fs = require('fs');
 
 // what the profile sets, in Settings order; FOLLOW: the apps that follow each (their app.json "profile")
-const KEYS = ['engine', 'redline', 'rpmScale', 'coldLimit', 'lightMode', 'lightStart', 'warmOil', 'warmCoolant',
-    'speedUnit', 'distUnit', 'tempUnit', 'pressUnit', 'fuelUnit', 'torqueUnit', 'powerUnit'];
+const KEYS = ['engine', 'redline', 'shiftBefore', 'rpmScale', 'coldLimit', 'lightMode', 'lightStart', 'coldGuard', 'warmOil',
+    'warmCoolant', 'speedUnit', 'distUnit', 'tempUnit', 'pressUnit', 'fuelUnit', 'torqueUnit', 'powerUnit'];
 const FOLLOW = {
     engine: ['M Vitals', 'Redline', 'Warm-Up', 'Virtual Dyno'],
-    redline: ['M Vitals', 'Redline', 'Warm-Up'],
-    rpmScale: ['M Vitals', 'Redline', 'Virtual Dyno'],
-    coldLimit: ['Redline', 'Warm-Up'],
+    redline: ['M Vitals', 'Redline', 'Warm-Up', 'AK Cluster'],
+    shiftBefore: ['Redline', 'AK Cluster'],
+    rpmScale: ['M Vitals', 'Redline', 'Virtual Dyno', 'AK Cluster'],
+    coldLimit: ['Redline', 'Warm-Up', 'AK Cluster'],
     lightMode: ['Redline'],
-    lightStart: ['Redline'],
-    warmOil: ['Redline', 'Warm-Up'],
+    lightStart: ['Redline', 'AK Cluster Centre'],
+    coldGuard: ['Redline', 'AK Cluster'],
+    warmOil: ['Redline', 'Warm-Up', 'AK Cluster'],
     warmCoolant: ['Warm-Up'],
-    speedUnit: ['M Vitals', 'Redline', 'Drag Timer', 'Brake Test', 'G-Force'],
+    speedUnit: ['M Vitals', 'Redline', 'Drag Timer', 'Brake Test', 'G-Force', 'AK Cluster'],
     distUnit: ['Brake Test', 'eDrive'],
-    tempUnit: ['M Vitals', 'Redline HUD', 'Warm-Up', 'eDrive', 'Transmission Config'],
-    pressUnit: ['M Vitals', 'Redline HUD'],
+    tempUnit: ['M Vitals', 'Redline HUD', 'Warm-Up', 'eDrive', 'Transmission Config', 'AK Cluster'],
+    pressUnit: ['M Vitals', 'Redline HUD', 'AK Cluster'],
     fuelUnit: ['Redline HUD'],
-    torqueUnit: ['M Vitals', 'Redline HUD', 'Virtual Dyno'],
-    powerUnit: ['M Vitals', 'Redline HUD', 'Virtual Dyno'],
+    torqueUnit: ['M Vitals', 'Redline HUD', 'Virtual Dyno', 'AK Cluster'],
+    powerUnit: ['M Vitals', 'Redline HUD', 'Virtual Dyno', 'AK Cluster'],
 };
+// ('AK Cluster': the cluster apps of akakingj/idrive7-cluster-info, Layouts / Centre / Info, which read this file too)
 
 const file = () => process.env.MGU_CAR_PROFILE || '/dev/shm/car-profile.json';
 const isSet = (v) => v !== undefined && v !== null && v !== 'app' && v !== -1;

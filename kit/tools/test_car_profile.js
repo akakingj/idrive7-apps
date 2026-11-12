@@ -136,6 +136,24 @@ const cases = {
         s._pollProfile();
         assert.strictEqual(s.get('redline'), 7000, 'another format version: not followed');
     },
+    'shift point before redline (0 a value, not Auto) and the cold guard (on / off to a switch)'() {
+        clear();
+        const schema = [
+            { key: 'shiftBefore', label: 'Shift point before redline', type: 'number', unit: 'rpm', default: 300, steps: [0, 100, 300], profile: 'shiftBefore' },
+            { key: 'coldGuard', label: 'Cold-engine rev guard', type: 'bool', default: true, profile: 'coldGuard', profileMap: { on: true, off: false } },
+        ];
+        const vals = P.publish(fakeProfile({ shiftBefore: 0, coldGuard: 'off' }), '1.1.0');
+        assert.deepStrictEqual(vals, { shiftBefore: 0, coldGuard: 'off' }, '0 is set (Each app is -1)');
+        tick += 5; fs.utimesSync(FILE, tick, tick);
+        const s = settingsIn(schema, { shiftBefore: 300, coldGuard: true });
+        assert.strictEqual(s.get('shiftBefore'), 0);
+        assert.strictEqual(s.get('coldGuard'), false);
+        assert.strictEqual(s.display('coldGuard'), 'Off');
+        writeProfile({ coldGuard: 'on' });
+        s._pollProfile();
+        assert.strictEqual(s.get('coldGuard'), true);
+        assert.strictEqual(s.get('shiftBefore'), 300, 'left to the app again');
+    },
     'every app.json "profile" is one the Car profile sets, with values it can give'() {
         const cp = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'car_profile', 'app.json'), 'utf8'));
         const byKey = {};
@@ -157,6 +175,10 @@ const cases = {
                     const lost = given.filter((v) => own.indexOf(v) < 0);
                     // a value the app can't show is left to the app (fromProfile), but every one should land
                     assert.deepStrictEqual(lost, [], app + '.' + s.key + ': the profile can give ' + lost.join(', ') + ', the app has no such option');
+                } else if (s.type === 'bool') {
+                    // a choice of the profile's ('on' / 'off') to an app's switch: each one mapped to true or false
+                    const given = p.options.map((o) => o[0]).filter((v) => v !== 'app');
+                    given.forEach((v) => assert(s.profileMap && typeof s.profileMap[v] === 'boolean', app + '.' + s.key + ': the profile\'s ' + v + ' to no true / false'));
                 } else assert.strictEqual(s.type, 'number', app + '.' + s.key);
             });
         });
