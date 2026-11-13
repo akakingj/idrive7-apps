@@ -66,6 +66,10 @@ async function background(bg) {
     diag.quiet = true; diag.busyLog = false;
     const lights = new Lights({ diag, log });
     const control = new Control({ settings, lights, ambient, log });
+    // (not told the car's state yet, as when the head unit woke for a remote service with the car locked: the car's
+    // own light until someone is there - the car's state, a door opening, the car moving or the app used - so a
+    // locked car's lights aren't switched on and written to for IDLE_MS)
+    control.away(true);
     control.start();
     // with the lights answering, the driving modes' looks replace BMW's colours by mode (ambient.js)
     lights.on('change', () => { ambient.slotsOff = lights.lights.length > 0; });
@@ -106,7 +110,7 @@ async function background(bg) {
     // until switched on)
     signals.watch('de.bmw.body.Light', '1', { StatusFunctionsIndicators: (v) => control.turn(turnOf(v)) }, log)
         .catch((e) => log.warn('turn signals: ' + (e && e.message || e)));
-    signals.watch('de.bmw.body.DoorsWindowsRoofMirrors', '1', { CentralLockingSystemAndPanelStatus: (v) => control.doors(doorsOf(v)) }, log)
+    signals.watch('de.bmw.body.DoorsWindowsRoofMirrors', '1', { CentralLockingSystemAndPanelStatus: (v) => { const open = doorsOf(v); control.doors(open); if (open.length) active(); } }, log)
         .catch((e) => log.warn('doors: ' + (e && e.message || e)));
     settings.onChange((key) => {
         if (key === 'nightDim') control.night(control._night);

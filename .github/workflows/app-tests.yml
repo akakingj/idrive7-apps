@@ -57,6 +57,7 @@ jobs:
       - run: node kit/tools/test_engine.js
       - run: node kit/tools/test_car_profile.js
       - run: node kit/tools/test_parked_diag.js
+      - run: node kit/tools/test_ambient_boot.js
       - run: node kit/tools/test_mgu_storage.js
       - run: node kit/tools/test_edrive.js
       - run: node kit/tools/test_fastkw.js
