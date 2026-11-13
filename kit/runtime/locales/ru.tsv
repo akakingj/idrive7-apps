@@ -1,4 +1,12 @@
 # English<TAB>Русский. Только отображаемый текст; поля протокола и значения настроек не изменяются.
+# this fork (car-profile): Car profile, Storage, the too-hot settings (kept up here, apart from the original's rows)
+Too hot	Перегрев
+Oil is too hot at	Масло перегрето при
+Coolant is too hot at	Охлаждающая жидкость перегрета при
+Gearbox is too hot at	КПП перегрета при
+Coolant temp warning	Предупреждение о температуре ОЖ
+Gearbox temp warning	Предупреждение о температуре КПП
+# (the original's rows from here)
 M Vitals	M Vitals
 Redline	Обороты
 Virtual Dyno	Диностенд
@@ -1836,12 +1844,6 @@ Hybrid Eco Pro	Гибрид Эко Про
 Hybrid	Гибрид
 Electric	Электро
 Give the HUD back to Cluster functions at switch-off	Возвращать HUD приложению Cluster functions при выключении
-Too hot	Перегрев
-Oil is too hot at	Масло перегрето при
-Coolant is too hot at	Охлаждающая жидкость перегрета при
-Gearbox is too hot at	КПП перегрета при
-Coolant temp warning	Предупреждение о температуре ОЖ
-Gearbox temp warning	Предупреждение о температуре КПП
 Hybrid Eco	Гибрид Эко
 Hybrid Comfort	Гибрид Комфорт
 Electric Individual	Электро индивидуальный

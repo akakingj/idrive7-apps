@@ -1,4 +1,12 @@
 # English<TAB>简体中文。只用于显示文本，不改协议字段或设置值。
+# this fork (car-profile): Car profile, Storage, the too-hot settings (kept up here, apart from the original's rows)
+Too hot	过热
+Oil is too hot at	机油过热温度
+Coolant is too hot at	冷却液过热温度
+Gearbox is too hot at	变速箱过热温度
+Coolant temp warning	冷却液温度警告
+Gearbox temp warning	变速箱温度警告
+# (the original's rows from here)
 M Vitals	M 车辆仪表
 Redline	换挡转速
 Virtual Dyno	虚拟马力机
@@ -1675,12 +1683,6 @@ Hybrid Eco Pro	混合动力节能
 Hybrid	混合动力
 Electric	纯电
 Give the HUD back to Cluster functions at switch-off	熄火后把 HUD 交还给 Cluster functions
-Too hot	过热
-Oil is too hot at	机油过热温度
-Coolant is too hot at	冷却液过热温度
-Gearbox is too hot at	变速箱过热温度
-Coolant temp warning	冷却液温度警告
-Gearbox temp warning	变速箱温度警告
 Hybrid Eco	混合动力节能
 Hybrid Comfort	混合动力舒适
 Electric Individual	纯电个性化
