@@ -1,6 +1,5 @@
 # English<TAB>한국어. 표시 문구만 번역하며 신호·설정 키·제어 값은 유지합니다.
 # this fork (car-profile): Car profile, Storage, the too-hot settings (kept up here, apart from the original's rows)
-The car standing still	차량 정지 상태
 Car profile	차량 프로필
 Each app	각 앱 설정
 Rev bar from	회전수 바 시작
@@ -35,6 +34,88 @@ No file systems found	파일 시스템 없음
 Press Refresh to measure	새로고침을 눌러 측정
 READ-ONLY	읽기 전용
 TOOLS IN /var/opt	/var/opt 도구
+# Warm-Up's minutes, drawn on their own (min alone is 최소, minimum)
+min|min	분
+# Live Adjustments 0.9.5's PIN (the original has no Korean for it yet)
+PIN for Engine Map and Burbles	엔진 맵·버블 PIN 잠금
+Engine Map and Burbles PIN	엔진 맵·버블 PIN
+Choose a 4-digit PIN	4자리 PIN을 정하세요
+Enter the new PIN again	새 PIN을 한 번 더 입력하세요
+Enter the PIN to turn the lock off	잠금을 끄려면 PIN을 입력하세요
+Engine Map is locked	엔진 맵이 잠겨 있습니다
+Burbles is locked	버블이 잠겨 있습니다
+Enter the PIN on the touchscreen	터치스크린에서 PIN을 입력하세요
+The two PINs didn't match · choose again	두 PIN이 다릅니다 · 다시 정하세요
+Too many wrong PINs · try again in	PIN 오류가 너무 많습니다 · 다시 시도까지
+Wrong PIN	PIN이 틀렸습니다
+tries left	회 남음
+try left	회 남음
+# Ambient config 2.4.4-2.4.5 and its Strobe tab, Live Data 1.0.11's fuel quality, Engine Config's xDrive notes (drawn from code, no Korean in the original)
+Ambient animation paused while this tab is open.	이 탭을 연 동안 앰비언트 애니메이션을 멈춥니다.
+Ambient light updates paused while this tab is open.	이 탭을 연 동안 앰비언트 조명 변경을 멈춥니다.
+They carry on when you leave the Strobe tab.	스트로브 탭을 나가면 다시 이어집니다.
+Flash length (tap to change)	플래시 길이 (눌러서 변경)
+Looking for the headlights' lamp control...	헤드라이트 램프 제어 장치를 찾는 중...
+FLM01 headlights	FLM01 헤드라이트
+Lamps:	램프:
+Every outside light flashes in turn for 15 s: high beam,	모든 외부 조명이 15초 동안 차례로 깜빡입니다: 상향등,
+cornering, fog, indicators, brake, reverse and more.	코너링등, 안개등, 방향지시등, 브레이크등, 후진등 등.
+The headlights flash fully on and dark, left and right in	헤드라이트가 좌우 번갈아 완전히 켜졌다 꺼집니다
+turn, for 15 s.	(15초 동안).
+Every lamp output flashes for 15 s, run by the body controller	모든 램프 출력이 15초 동안 깜빡입니다. 바디 제어기가
+itself (BDC_G11 and BDC_G05).	직접 실행합니다 (BDC_G11, BDC_G05).
+Flashing headlights on public roads is illegal and dangerous	공공도로에서 헤드라이트를 깜빡이는 것은 불법이며
+to other drivers.	다른 운전자에게 위험합니다.
+Redline shift flash	Redline 변속 시점 깜빡임
+High beam learned: channel	상향등 학습됨: 채널
+Learn: no channel reading from the headlight	학습: 헤드라이트 채널 값을 읽지 못함
+Learn: no high beam seen (was it on already?)	학습: 상향등이 감지되지 않음 (이미 켜져 있었나요?)
+Learning: switch the high beam on with the stalk now	학습 중: 지금 레버로 상향등을 켜세요
+Light show not started: the headlights are hot	라이트 쇼 시작 안 함: 헤드라이트 과열
+Light show: no channel reading from the headlight	라이트 쇼: 헤드라이트 채널 값을 읽지 못함
+Light show: the body controller refused	라이트 쇼: 바디 제어기가 거부함
+Light show: the body controller refused the diagnostic session	라이트 쇼: 바디 제어기가 진단 세션을 거부함
+Light show: the headlights refused the diagnostic session	라이트 쇼: 헤드라이트가 진단 세션을 거부함
+Light show: the headlights' lamp test did not answer	라이트 쇼: 헤드라이트 램프 테스트 응답 없음
+Strobe not started: the headlights are hot	스트로브 시작 안 함: 헤드라이트 과열
+Strobe not started: the lamp test does not light the high beam's channels (Learn again)	스트로브 시작 안 함: 램프 테스트에서 상향등 채널이 켜지지 않음 (다시 학습)
+Strobe stopped: the headlights got hot	스트로브 중지: 헤드라이트 과열
+Strobe stopped: the high beams did not follow	스트로브 중지: 상향등이 따라오지 않음
+Strobe: no channel reading from the headlight	스트로브: 헤드라이트 채널 값을 읽지 못함
+Strobe: refused	스트로브: 거부됨
+Strobe: the body controller refused the diagnostic session	스트로브: 바디 제어기가 진단 세션을 거부함
+Strobe: the headlights refused the diagnostic session	스트로브: 헤드라이트가 진단 세션을 거부함
+Strobe: the headlights' lamp test did not answer	스트로브: 헤드라이트 램프 테스트 응답 없음
+the high beam's channels are not known yet (Learn)	상향등 채널을 아직 모름 (학습 필요)
+Fuel quality	연료 품질
+Refuellings, low quality	저품질 급유 횟수
+Refuellings, medium quality	중품질 급유 횟수
+Refuellings, high quality	고품질 급유 횟수
+Refuelling 1, mileage	급유 1 주행거리
+Refuelling 1, fuel quality	급유 1 연료 품질
+Refuelling 2, mileage	급유 2 주행거리
+Refuelling 2, fuel quality	급유 2 연료 품질
+Refuelling 3, mileage	급유 3 주행거리
+Refuelling 3, fuel quality	급유 3 연료 품질
+Refuelling 4, mileage	급유 4 주행거리
+Refuelling 4, fuel quality	급유 4 연료 품질
+Refuelling 5, mileage	급유 5 주행거리
+Refuelling 5, fuel quality	급유 5 연료 품질
+Accepted by the DSC	DSC가 수락함
+Accepted by the DSC · drive without switching the ignition off	DSC가 수락함 · 점화를 끄지 말고 주행하세요
+Accepted by the VIP · drive without switching off and watch the front-axle torque	VIP가 수락함 · 끄지 말고 주행하며 앞차축 토크를 확인하세요
+Accepted by the VIP · start the engine without switching the ignition off	VIP가 수락함 · 점화를 끄지 말고 엔진 시동을 거세요
+Accepted by the VIP · the front-axle torque shows the effect	VIP가 수락함 · 앞차축 토크에 효과가 나타납니다
+Sent through the VIP · the front-axle torque shows the effect	VIP로 전송함 · 앞차축 토크에 효과가 나타납니다
+Ignition on	점화 켜짐
+Needs:	필요:
+Sending to the	전송 중:
+Press again to switch xDrive back on	xDrive를 다시 켜려면 한 번 더 누르세요
+Press again to switch xDrive off	xDrive를 끄려면 한 번 더 누르세요
+Read only · wheel slip compared between the wheels, above 5 km/h	읽기 전용 · 5 km/h 이상에서 바퀴 간 슬립 비교
+The DSC does not offer LMV_FUNKTION	DSC가 LMV_FUNKTION을 지원하지 않음
+The transfer case reports the mode once read	트랜스퍼 케이스가 읽는 즉시 모드를 알려 줍니다
+Confirm xDrive on	xDrive 켜기 확인
 # (the original's rows from here)
 M Vitals	M 차량 정보
 Redline	레드라인
@@ -2305,6 +2386,7 @@ graded	회 평가
 vs shift point	(변속 시점 대비)
 CRUISE	순항
 # Ambient config 2.0: the app's screens (main.js, scenes.js, lights.js)
+The car standing still (light show)	차량 정지 상태 (라이트 쇼)
 Animations	애니메이션
 Driving modes	주행 모드
 Favourites	즐겨찾기

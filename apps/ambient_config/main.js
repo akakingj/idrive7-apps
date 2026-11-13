@@ -28,6 +28,7 @@ const { Lights } = require('./lights');
 const { Control } = require('./control');
 const { Others } = require('./others');
 const { Strobe, gateChecks, gateWhy } = require('./strobe');
+const Parked = require('./kit/parked');
 const { t: translate } = require('./kit/i18n');
 const { drawCabin } = require('./cabin');
 const { sample } = require('./lin');
@@ -96,12 +97,10 @@ async function background(bg) {
             control.away(n <= 3);
         },
     }, log).catch((e) => log.warn('vehicle state: ' + (e && e.message || e)));
-    // the speed (also the strobe's: never while the car moves)
-    let kmh = null, kmhAt = 0;
+    // the speed
     signals.watch('de.bmw.infotainment.vehicle.Vehicle2', '1', {
         statusCarSpeed2: (v) => {
             const k = v && v.speedVehicleCentreOfGravity;
-            if (typeof k === 'number' && k !== 65535 && k * 0.015625 < 400) { kmh = k * 0.015625; kmhAt = Date.now(); }
             if (typeof k === 'number' && k !== 65535 && k * 0.015625 > 1 && k * 0.015625 < 400) active();
         },
     }, log).catch((e) => log.warn('speed: ' + (e && e.message || e)));
@@ -119,10 +118,11 @@ async function background(bg) {
     });
     const others = new Others({ log }).start();
     // the high beam strobe and the light show (strobe.js): only for use on private property, behind its setting,
-    // with someone in the car and the car standing still (checked again on every flash: it stops when the car moves);
-    // why not, or null
-    const checks = () => gateChecks({ setting: settings.get('strobe') === true, away: control._away, kmh, kmhAt }, Date.now());
-    const gate = () => gateWhy(checks());
+    // with someone in the car; the light show also with the car standing still (kit/parked.js, checked again on every
+    // step: it stops when the car moves off); why not, or null
+    const parked = Parked.watch(bg, log);
+    const checks = () => gateChecks({ setting: settings.get('strobe') === true, away: control._away, moving: parked.moving() });
+    const gate = (what) => gateWhy(checks(), what);
     // the high beam's channels learned on a headlight unit, kept in the data folder
     const fs = require('fs'), path = require('path');
     const chFile = bg.dataDir ? path.join(bg.dataDir, 'strobe_channels.json') : null;
@@ -409,6 +409,11 @@ mgu.run({
                 [['all', 'All lights'], ['high', 'High beam']].forEach(([k, n], i) => {
                     G.button(cv, t, 44 + i * 236, 284, 224, 42, n, () => { settings.set('strobeLights', k); return redraw(); }, { primary: lights === k, key: 'lights-' + k });
                 });
+                // the body controller's flashes take their length for every pattern, not only police (issue #157)
+                if (strobe.kind === 'fn') {
+                    cv.text('Flash length (tap to change)', 520, 274, 18, t.dim);
+                    G.button(cv, t, 520, 284, 220, 42, flashMs + ' ms', () => { settings.set('strobeFlashMs', next(['50', '80', '100', '150'], flashMs)); return redraw(); }, { key: 'tune-strobeFlashMs' });
+                }
             }
             if (strobe && strobe.head) {
                 // which channels are the high beam, seen while it is switched on with the stalk
@@ -450,6 +455,10 @@ mgu.run({
                 : ['Every lamp output flashes for 15 s, run by the body controller', 'itself (BDC_G11 and BDC_G05).']).forEach((l, i) => cv.text(l, 796, 112 + i * 26, 18, t.dim));
             cv.text('Only for use on private property.', 796, 190, 20, t.warn, { font: 'bold' });
             ['Flashing headlights on public roads is illegal and dangerous', 'to other drivers.'].forEach((l, i) => cv.text(l, 796, 220 + i * 26, 18, t.text));
+            if (paused) {
+                cv.text(paused.moving ? 'Ambient animation paused while this tab is open.' : 'Ambient light updates paused while this tab is open.', 796, 300, 20, t.warn, { font: 'bold' });
+                cv.text('They carry on when you leave the Strobe tab.', 796, 326, 18, t.dim);
+            }
             const srate = settings.get('showRate') === 'fast' ? 'fast' : 'normal';
             cv.text('Speed', 796, 414, 18, t.dim);
             [['fast', 'Fast'], ['normal', 'Normal']].forEach(([k, n], i) => {
@@ -470,8 +479,32 @@ mgu.run({
             dirty = false;
             await ui.image('MAIN_GFX', cv);
         }
+        /*
+         * The Strobe tab on screen: the ambient lights stop writing (their animation's requests to the body controller
+         * in between got the strobe's diagnostic session refused, issue #157), and carry on once the tab is left: another
+         * tab, the screen gone (the loop stops ticking) or the Strobe setting off. paused: { moving } while held.
+         */
+        let paused = null, strobeSeen = 0;
+        const PAUSE_KEY = 'strobe-tab', SEEN_MS = 1500;
+        const animating = () => !!((lights.scene && S.moves(lights.scene)) || (lights._overs && lights._overs.size));
+        const pauseCheck = () => {
+            const want = page === 4 && tabs().length > 4 && Date.now() - strobeSeen < SEEN_MS;
+            if (want && !paused) {
+                paused = { moving: animating() };
+                log.info('ambient: ' + (paused.moving ? 'animation' : 'light updates') + ' paused for the Strobe tab');
+                lights.hold(PAUSE_KEY, true).catch((e) => log.warn('ambient: hold: ' + e));
+                dirty = true;
+            } else if (!want && paused) {
+                paused = null;
+                log.info('ambient: the Strobe tab left, the lights carry on');
+                lights.hold(PAUSE_KEY, false);
+                dirty = true;
+            }
+        };
+        setInterval(pauseCheck, 250);
         // moving lights redraw a few times a second, the rest when something changes
         const tick = () => {
+            if (page === 4) { strobeSeen = Date.now(); pauseCheck(); }
             const moving = (lights.scene && S.moves(lights.scene)) || (page === 1 && control.on() && S.moves(look()));
             // (the Strobe tab: its checks follow the car, so it draws on each tick)
             return dirty || (moving && page <= 1) || page === 4 ? render() : null;
@@ -490,7 +523,7 @@ mgu.run({
                 return null;
             });
         }
-        ctx.onTab((i) => { page = i; if (i >= 2) editing = null; return redraw(); });
+        ctx.onTab((i) => { page = i; if (i >= 2) editing = null; if (i === 4) strobeSeen = Date.now(); pauseCheck(); return redraw(); });
         lights.on('change', () => { dirty = true; });
         ambient.on('change', () => { dirty = true; });
         others.on('change', () => { dirty = true; });

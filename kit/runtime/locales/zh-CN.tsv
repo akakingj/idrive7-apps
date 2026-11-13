@@ -1,6 +1,5 @@
 # English<TAB>简体中文。只用于显示文本，不改协议字段或设置值。
 # this fork (car-profile): Car profile, Storage, the too-hot settings (kept up here, apart from the original's rows)
-The car standing still	车辆静止
 Too hot	过热
 Oil is too hot at	机油过热温度
 Coolant is too hot at	冷却液过热温度
@@ -767,6 +766,7 @@ Head unit: Bluetooth/Wi-Fi aerial 1: Disconnected line	主机：蓝牙 / Wi-Fi �
 KAFAS: camera calibration missing	KAFAS：摄像头缺少标定
 
 # Updated app and home-screen widget labels (2026-10-31).
+The car standing still (light show)	车辆静止（灯光表演）
 EDrive	eDrive助手
 Battery power now	当前电池功率
 Battery unit	电池控制单元

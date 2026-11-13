@@ -1,5 +1,4 @@
 {
-  "The car standing still": "Автомобиль стоит",
   "Too hot": "Перегрев",
   "Oil is too hot at": "Масло перегрето при",
   "Coolant is too hot at": "Охлаждающая жидкость перегрета при",
@@ -1176,6 +1175,7 @@
   "up": "вверх",
   "m ago": "мин назад",
   "Language": "Язык",
+  "The car standing still (light show)": "Автомобиль стоит (световое шоу)",
   "Per-shift map summary": "Сводка карты переключений",
   "Next item: next pack": "Следующий пункт: следующий пакет",
   "Next item: next temperature": "Следующий пункт: следующая температура",
