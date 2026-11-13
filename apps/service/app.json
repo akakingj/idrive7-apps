@@ -2,11 +2,12 @@
   "id": "service",
   "title": "Service",
   "description": "Service requirements from the instrument cluster: oil, brakes, brake fluid, vehicle check, inspection - distance, date, details; brake fluid and vehicle check reset",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "vendor": "custom",
   "loggingId": "OA96",
   "iconGlyph": "wrench",
   "signals": {
+    "de.bmw.infrastructure.VehicleCondition": { "_optional": "the car locked and left: no diagnostic request, so it can sleep (kit/diag.js)", "VehicleCondition": "s" },
     "de.bmw.infotainment.KombiInterface_2": {
       "cbsDataServiceList": "rs",
       "cbsDataSBA": "rs",

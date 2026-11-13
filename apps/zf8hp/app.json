@@ -2,11 +2,12 @@
   "id": "zf8hp",
   "title": "Transmission Config",
   "description": "Transmission Config, experimental ZF 8HP monitor: live data, clutch fill adaptations, shift maps and temperature history",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "vendor": "custom",
   "loggingId": "OAA2",
   "iconGlyph": "8HP",
   "signals": {
+    "de.bmw.infrastructure.VehicleCondition": { "_optional": "the car locked and left: no diagnostic request, so it can sleep (kit/diag.js)", "VehicleCondition": "s" },
     "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
       "_instances": "SystemFunctionsInternalTasuInst1",
       "_methods": [

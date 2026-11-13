@@ -30,7 +30,7 @@
  *   new DidReader(link, { ecu: 0x12 })           // kit/dids.js works on top of it (physical())
  *   link.cancel()                                // drop what is still queued (page left)
  */
-const { Diag, hex, NRC, ALL } = require('./diag');
+const { Diag, hex, NRC, ALL, parkedNow, carState } = require('./diag');
 
 const READ = Object.freeze({ 0x22: 'ReadDataByIdentifier', 0x01: 'OBD current data', 0x09: 'OBD vehicle information' });
 const MAX_DIDS = 8;                   // identifiers in one 22 request
@@ -72,6 +72,8 @@ class ReadOnlyDiag {
         this.chain = Promise.resolve();
         this.next = 0;                // the earliest time the next request may go
         this.gen = 0;                 // cancel() counts it up: older queued requests are dropped
+        // the car in use again after being parked (diag.js holds every request while parked): every unit asked again
+        carState.onUse.push(() => this.wake());
     }
 
     async init() { await LINKS.get(this).init(); return this; }
@@ -98,6 +100,8 @@ class ReadOnlyDiag {
             const t0 = Date.now();
             const uds = await LINKS.get(this).physical(target, sid, d, timeoutMs || 1500, accept);
             if (uds) { this.stats.ms += Date.now() - t0; this.stats.timed++; }
+            // (held while the car is parked: not a unit that stopped answering)
+            if (!uds && parkedNow()) return null;
             if (!uds) {
                 this.stats.missed++;
                 this.misses[target] = (this.misses[target] || 0) + 1;

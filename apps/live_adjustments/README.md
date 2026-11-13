@@ -26,7 +26,7 @@ What the flap should do is `auto.js`; every command still goes through `controll
 
 | Setting | Default | |
 |---|---|---|
-| Hold Open / Close | On | the DME lets a tester's command go after ~20 s: On sends Open / Close again every 15 s (armed only); Off lets the car take over |
+| Hold Open / Close | On | the DME lets a tester's command go after ~20 s: On sends Open / Close again every 15 s (armed only, and only while the engine runs); Off lets the car take over |
 | Close: hand back above | 4,000 rpm | 2,500 – 5,500 rpm or Never: Close is paused (OEM sent, the DME opens the flap as it needs) while the live engine speed is above it, and resumed 500 rpm below it. Open and OEM are never paused |
 
 **No engine speed** (armed, a Close limit set, no live engine speed for 5 s): a manual Close

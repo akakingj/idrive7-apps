@@ -35,6 +35,49 @@ const NRC = {
     0x72: 'programming failure', 0x78: 'pending', 0x7E: 'not supported in session', 0x7F: 'not supported in session',
 };
 
+/*
+ * Nothing asked of the car's units while it is parked. Every request goes through the car's gateway and wakes its
+ * networks: asked after the car is locked, they never get to sleep (the body controller stores "no sleep in parking
+ * state", the car warns "Battery management: malfunction while shutting down the vehicle electronics"; Nov 10 2026,
+ * idrive7-cluster-info). So while the car's own state (VehicleCondition, BMW's PWF state) says parked or standby with
+ * nobody in it (1, 2, 3), past a short grace for what was under way (a light given back), a request is not sent: it
+ * goes as one the units don't answer (null after its timeout, a functional request with no replies), as a sleeping
+ * unit would. Someone in the car (5), ignition on, driving: sent as before; a state not told yet (no change since the
+ * app started): sent. Needs "de.bmw.infrastructure.VehicleCondition": { "VehicleCondition": "s" } in the app's
+ * signals (without it nothing is held). One watch for every Diag in the app.
+ */
+const PARKED = [1, 2, 3];
+const PARKED_GRACE_MS = 20000;
+const COND = { PARKEN_BN_NIO: 1, PARKEN_BN_IO: 2, STANDFUNKTIONEN_KUNDE_NICHT_IM_FZG: 3, WOHNEN: 5,
+    PRUEFEN_ANALYSE_DIAGNOSE: 7, FAHRBEREITSCHAFT_HERSTELLEN: 8, FAHREN: 10, FAHRBEREITSCHAFT_BEENDEN: 12 };
+/** The car's state from a notification: a number or a name, alone or in a struct; undefined when it isn't one. */
+function conditionOf(v) {
+    if (v && typeof v === 'object') {
+        if (v.statusConditionVehicle !== undefined) return conditionOf(v.statusConditionVehicle);
+        for (const k of Object.keys(v)) { if (/condition/i.test(k)) { const c = conditionOf(v[k]); if (c !== undefined) return c; } }
+        return undefined;
+    }
+    const n = typeof v === 'number' ? v : COND[String(v).toUpperCase()];
+    return n >= 1 && n <= 12 ? n : undefined;
+}
+const carState = { cond: undefined, since: 0, watching: false, held: 0, logged: false, now: () => Date.now(), onUse: [] };
+function noteCondition(v, log) {
+    const c = conditionOf(v);
+    if (c === undefined || c === carState.cond) return;
+    const was = parkedNow();
+    carState.cond = c; carState.since = carState.now();
+    if (PARKED.indexOf(c) < 0 && carState.logged) { carState.logged = false; if (log) log.info('diagnostics: the car is in use again (state ' + c + '): requests go out'); }
+    if (was && !parkedNow()) { carState.held = 0; carState.onUse.forEach((fn) => { try { fn(); } catch (e) { /* a listener's own */ } }); }
+}
+/** Parked (1-3) for longer than the grace: requests are held. */
+function parkedNow() { return PARKED.indexOf(carState.cond) >= 0 && carState.now() - carState.since > PARKED_GRACE_MS; }
+function watchCondition(signals, log) {
+    if (carState.watching || !signals || typeof signals.watch !== 'function') return;
+    carState.watching = true;
+    Promise.resolve().then(() => signals.watch('de.bmw.infrastructure.VehicleCondition', '1', { VehicleCondition: (v) => noteCondition(v, log) }, log))
+        .then((s) => { if (s && s.error && log) log.info('diagnostics: no car state (' + s.error + '): requests are never held'); }, () => {});
+}
+
 class Diag extends EventEmitter {
     constructor(signals, log) {
         super();
@@ -47,6 +90,7 @@ class Diag extends EventEmitter {
     }
 
     async init() {
+        watchCondition(this.signals, this.log);
         try {
             this.p = await this.signals.proxy(IFACE, INSTANCE);
             await this.signals.on(this.p, 'sendTasuResponse', (v) => this._onResponse(v), this.log);
@@ -77,6 +121,13 @@ class Diag extends EventEmitter {
     async send(target, sid, data, opts) {
         if (!this.p) throw new Error(this.error || 'no diagnostic link');
         const d = data || [];
+        if (parkedNow()) {
+            // (the car parked: not sent, as a unit that doesn't answer; see PARKED above)
+            carState.held++;
+            if (!carState.logged) { carState.logged = true; this.log.info('diagnostics: the car is parked (state ' + carState.cond + '): nothing asked of its units until it is in use'); }
+            this.held = (this.held || 0) + 1;
+            return 'NO_ERROR';
+        }
         const maxRetries = opts && opts.maxRetries != null ? opts.maxRetries : 4;
         const callTimeoutMs = opts && opts.callTimeoutMs || 8000;
         const retryBaseMs = opts && opts.retryBaseMs || this.busyMs;
@@ -198,4 +249,4 @@ function statusInfo(b) {
     return { label: 'HISTORY', sev: 'dim' };
 }
 
-module.exports = { Diag, parseDtcReply, statusInfo, toBytes, hex, NRC, ALL, replyTo };
+module.exports = { Diag, parseDtcReply, statusInfo, toBytes, hex, NRC, ALL, replyTo, conditionOf, noteCondition, parkedNow, carState, PARKED_GRACE_MS };

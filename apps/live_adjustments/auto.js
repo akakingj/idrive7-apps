@@ -209,7 +209,10 @@ class AutoFlap {
             this._q = this._q.then(async () => {
                 const eff = this.effective();
                 if (eff === 'OEM' || eff !== this.sent || !this.armed || !this.holdOn) return;
-                await this.c.setMode(eff);
+                // (sent again only while the engine runs: with it off the DME has nothing to hold, and a request every
+                // 15 s would keep the car from sleeping once it is parked; looked at again at the next hold)
+                const r = this.rpm();
+                if (r !== null && r > 300) await this.c.setMode(eff);
                 this._schedule();
             }).catch((e) => this.log.error('hold', e)).then(() => this.onChange());
         }, this.holdMs);

@@ -2,11 +2,12 @@
   "id": "car_vitals",
   "title": "M Vitals",
   "description": "Live engine, thermal, intake / fuel / ignition, tyre and chassis gauges",
-  "version": "2.27.6",
+  "version": "2.27.7",
   "vendor": "custom",
   "loggingId": "OA93",
   "iconGlyph": "gauge",
   "signals": {
+    "de.bmw.infrastructure.VehicleCondition": { "_optional": "the car locked and left: no diagnostic request, so it can sleep (kit/diag.js)", "VehicleCondition": "s" },
     "de.bmw.infotainment.vehicle.CDS": {
       "statusEngineSpeed2": "rs",
       "statusEngineTemperature": "rs"
