@@ -12,8 +12,8 @@
  * kind: "platform" (oap_12201, MainApp), "custom" (listed in oap_12201/data/custom_apps.json: apps installed by
  * the kit's installer or the MGU Store), "stock" (BMW's own). tools: the custom tools' folders in /var/opt (renderers,
  * the Store, cluster-render ...). Sizes are what du counts (allocated KB).
- * It measures at start, then every 30 minutes, and within 5 s of a request: the Storage app's Refresh creates
- * /dev/shm/mgu-storage-request (any user may), which is removed when the new measurement is written.
+ * It measures at start, then every 30 minutes, and within 5 s of a request (at most once a minute): the Storage app's
+ * Refresh creates /dev/shm/mgu-storage-request (any user may), which is removed when the new measurement is written.
  * Reading only: it changes nothing but its own two files. Run at the lowest CPU and disk priority (the unit).
  */
 const fs = require('fs');
@@ -27,7 +27,8 @@ const P = {
     out: env.MSH_OUT || '/run/mgu-storage/apps.json',
     request: env.MSH_REQUEST || '/dev/shm/mgu-storage-request',
 };
-const EVERY_MS = 30 * 60 * 1000, POLL_MS = 5000;
+// (a Refresh measures at most once a minute: any app may ask, and a measurement reads every folder)
+const EVERY_MS = 30 * 60 * 1000, POLL_MS = 5000, ASKED_GAP_MS = 60 * 1000;
 // custom tools in /var/opt by folder name (BMW's own folders there are left out)
 const TOOL = /^(mgu[-_]|idrive7|cluster[-_]?render|waze|robertn|iterio|car[-_]apps)/i;
 
@@ -50,11 +51,23 @@ function readCustom(file) {
     try { return Object.keys(JSON.parse(fs.readFileSync(file, 'utf8')) || {}); } catch (e) { return []; }
 }
 
+/**
+ * A JSON file of the app's own: a plain file inside its folder, not over 1 MB. (This runs as root and the folder is the
+ * app's: a link in it could point at any file on the unit, and its name field would come out in apps.json.)
+ */
+function ownJson(dir, rel) {
+    const root = fs.realpathSync(dir), real = fs.realpathSync(path.join(dir, rel));
+    if (real.indexOf(root + path.sep) !== 0) throw new Error('outside the app folder');
+    const st = fs.lstatSync(real);
+    if (!st.isFile() || st.size > 1 << 20) throw new Error('not a plain file');
+    return JSON.parse(fs.readFileSync(real, 'utf8'));
+}
+
 /** The name an app shows: the kit's app-spec.json title, else package.json's displayName / name, else null. */
 function titleOf(dir) {
     for (const f of ['source/javascript/kit/app-spec.json', 'package.json', 'source/package.json']) {
         try {
-            const j = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+            const j = ownJson(dir, f);
             const t = j.title || j.displayName || j.name;
             if (t && typeof t === 'string') return t.slice(0, 60);
         } catch (e) { /* next */ }
@@ -138,7 +151,8 @@ function main() {
         if (busy) return;
         let asked = false;
         try { asked = fs.existsSync(P.request); } catch (e) { /* no */ }
-        if (!asked && Date.now() - last < EVERY_MS) return;
+        const since = Date.now() - last;
+        if (asked ? since < ASKED_GAP_MS : since < EVERY_MS) return;      // (an early ask waits: the file stays till then)
         busy = true;
         once().catch((e) => log('error: ' + (e && e.stack || e))).then(() => { last = Date.now(); busy = false; });
     };
@@ -146,5 +160,5 @@ function main() {
     setInterval(tick, POLL_MS);
 }
 
-module.exports = { readUids, readCustom, titleOf, measure, write, once, walkKb, P, TOOL };
+module.exports = { readUids, readCustom, titleOf, ownJson, ASKED_GAP_MS, measure, write, once, walkKb, P, TOOL };
 if (require.main === module) main();

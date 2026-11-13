@@ -138,8 +138,9 @@ class Settings {
     /** Read the Car profile when its file changed; true when its values may have. */
     _readProfile() {
         const file = Settings.profileFile();
+        // (its time, size and inode: a write inside the same millisecond still counts as a change)
         let at = 0;
-        try { at = fs.statSync(file).mtime.getTime(); } catch (e) { at = 0; }
+        try { const st = fs.statSync(file); at = st.mtime.getTime() + ':' + st.size + ':' + st.ino; } catch (e) { at = 0; }
         if (at === this._profAt) return false;
         let vals = {};
         if (at) {

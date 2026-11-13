@@ -69,6 +69,9 @@ const cases = {
         mk(path.join(oap, 'oap_12450', 'source', 'javascript', 'kit'), 3);
         fs.writeFileSync(path.join(oap, 'oap_12450', 'source', 'javascript', 'kit', 'app-spec.json'), JSON.stringify({ id: 'redline', title: 'Redline' }));
         mk(path.join(oap, 'oap_12449'), 1);
+        // a link out of an app's folder is not followed (the helper runs as root): no name read through it
+        const secret = path.join(base, 'secret.json'); fs.writeFileSync(secret, JSON.stringify({ name: 'SECRET' }));
+        fs.symlinkSync(secret, path.join(oap, 'oap_12449', 'package.json'));
         mk(path.join(vo, 'mgu-store'), 2); mk(path.join(vo, 'idrive7-renderd'), 1); mk(path.join(vo, 'bmw_own'), 1);
         Object.assign(process.env, { MSH_OAP: oap, MSH_VAR_OPT: vo, MSH_OUT: path.join(base, 'run', 'apps.json'), MSH_REQUEST: path.join(base, 'req') });
         delete require.cache[require.resolve('../storage-helper/mgu-storage-helper')];
