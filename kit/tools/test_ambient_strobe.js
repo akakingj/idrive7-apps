@@ -5,7 +5,7 @@
 // flash checked, the session kept with 3E 00, and the lamps handed back however it ends.
 //   node kit/tools/test_ambient_strobe.js
 const path = require('path');
-const { Strobe, MAX_MS } = require(path.join(__dirname, '..', '..', 'apps', 'ambient_config', 'strobe'));
+const { Strobe, MAX_MS, gateChecks, gateWhy } = require(path.join(__dirname, '..', '..', 'apps', 'ambient_config', 'strobe'));
 
 let fails = 0, checks = 0;
 const ok = (c, msg) => { checks++; if (!c) { fails++; console.log('FAIL ' + msg); } };
@@ -454,6 +454,17 @@ const writes = (diag, a) => diag.sent.filter((x) => x.indexOf(hex([a]) + ' 31 01
         ok(ev[0] === 'hold' && ev[ev.length - 1] === 'go', 'light show: held and let go the same way');
     }
 
+    // never while the car moves: the gate (checked again on every flash) says no above 3 km/h
+    {
+        const now = 1e7, g = (o) => gateWhy(gateChecks(Object.assign({ setting: true, away: false, kmh: null, kmhAt: 0 }, o), now));
+        ok(g({}) === null, 'standing, no speed yet: may run');
+        ok(g({ kmh: 0, kmhAt: now - 100 }) === null, 'standing at 0 km/h: may run');
+        ok(g({ kmh: 2, kmhAt: now - 100 }) === null, 'creeping under 3 km/h: may run');
+        ok(g({ kmh: 30, kmhAt: now - 100 }) === 'the car standing still: no', 'moving: no (' + g({ kmh: 30, kmhAt: now - 100 }) + ')');
+        ok(g({ kmh: 30, kmhAt: now - 20000 }) === null, 'a speed 20 s old (the car sends it while it moves): standing');
+        ok(g({ setting: false }) === 'switched on in the settings: no', 'off in the settings');
+        ok(g({ away: true }) === 'someone in the car: no', 'nobody in the car');
+    }
     console.log('ambient strobe: ' + checks + ' checks, ' + fails + ' failed');
     process.exit(fails ? 1 : 0);
 })().catch((e) => { console.log('FAIL ' + (e && e.stack || e)); process.exit(1); });

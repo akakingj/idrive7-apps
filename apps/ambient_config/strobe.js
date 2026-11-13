@@ -702,4 +702,22 @@ class Strobe extends EventEmitter {
     stop() { this._stop = true; }
 }
 
-module.exports = { Strobe, KINDS, HEAD, F, FN_PATTERNS, FLASH, POLICE_ORDERS, flashTicks, SIDES, FL_L, FL_R, HALF_MS, MAX_MS, SHOW_MS, statusIndex };
+/*
+ * Whether the strobe and the light show may run now: switched on in the settings, someone in the car, and the car
+ * standing still (they flash the high beams, or every headlight LED against all dark: never on the road).
+ *   gateChecks({ setting, away, kmh, kmhAt }, nowMs) -> [[label, ok], ...]   gateWhy(checks) -> null (may run) | why not
+ * kmh: the last speed the car sent (km/h, null: none yet), kmhAt: when. A speed over STILL_KMH within STILL_MS counts as
+ * moving; none yet, or none for STILL_MS (the car sends it while it moves), as standing.
+ */
+const STILL_KMH = 3, STILL_MS = 10000;
+function gateChecks(o, nowMs) {
+    const moving = typeof o.kmh === 'number' && o.kmh > STILL_KMH && nowMs - (o.kmhAt || 0) < STILL_MS;
+    return [
+        ['Switched on in the settings', o.setting === true],
+        ['Someone in the car', !o.away],
+        ['The car standing still', !moving],
+    ];
+}
+const gateWhy = (checks) => { const c = checks.find((x) => !x[1]); return c ? c[0].toLowerCase() + ': no' : null; };
+
+module.exports = { gateChecks, gateWhy, STILL_KMH, STILL_MS, Strobe, KINDS, HEAD, F, FN_PATTERNS, FLASH, POLICE_ORDERS, flashTicks, SIDES, FL_L, FL_R, HALF_MS, MAX_MS, SHOW_MS, statusIndex };
