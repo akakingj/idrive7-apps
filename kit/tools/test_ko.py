@@ -27,7 +27,7 @@ for tag in ('ko-kr', 'ko-KR'):
     locale = json.loads((staged / 'locale.json').read_text(encoding='utf-8'))
     spec = json.loads((staged / 'app-spec.json').read_text(encoding='utf-8'))
     assert locale['language'] == 'ko' and locale['strings']['SPEED'] == '속도'
-    assert spec['version'].endswith('-ko.1') and (staged / 'fonts/korean.json').is_file()
+    assert '-ko' not in spec['version'] and (staged / 'fonts/korean.json').is_file()
 print('PASS: ko-kr / ko-KR CLI aliases produce Korean stages, fonts and canonical package versions')
 words = json.loads((ROOT / 'kit/runtime/locales/ko.json').read_text(encoding='utf-8'))
 atlas = json.loads((ROOT / 'kit/localization/fonts/korean.json').read_text(encoding='utf-8'))['sizes'][0]
@@ -41,7 +41,7 @@ for path in sorted((ROOT / 'apps').glob('*/app.json')):
     spec = localize_spec(original, 'ko')
     for key in ('id', 'signals', 'config', 'assets', 'startWidget', 'loggingId'):
         assert spec.get(key) == original.get(key), (path, key)
-    assert spec['version'] == original['version'] + '-ko.1'
+    assert spec['version'] == original['version']   # (this fork: no suffix, see localize.package_version)
     for a, b in zip(original['settings'], spec['settings']):
         assert a['key'] == b['key'] and a['default'] == b['default']
         assert [o[0] for o in a.get('options', [])] == [o[0] for o in b.get('options', [])]

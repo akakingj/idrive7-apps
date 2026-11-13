@@ -45,6 +45,10 @@ def text(value, words):
 
 
 def package_version(version, language):
+    # (this fork: Korean keeps the plain version. The MGU Store builds the apps in Korean (mgu-repo.json) and
+    # looks for dist/<id>@<version>.tgz with the app.json version, so a '-ko.1' suffix would hide the package)
+    if language == 'ko':
+        return version
     revisions = json.loads((Path(__file__).parent / 'locale-revisions.json').read_text(encoding='utf-8'))
     return version if language == 'en' else version + '-' + language.lower().replace('-', '.') + '.' + str(revisions.get(language, 1))
 

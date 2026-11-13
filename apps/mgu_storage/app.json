@@ -2,7 +2,7 @@
   "id": "mgu_storage",
   "title": "Storage",
   "description": "How full the head unit is: free space on each of its file systems, memory in use, and how much space each app takes, BMW's own and the custom ones apart (with the Storage helper from the MGU Store)",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "vendor": "custom",
   "loggingId": "OAB1",
   "iconGlyph": "storage",
