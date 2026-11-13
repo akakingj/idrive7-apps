@@ -2,7 +2,7 @@
   "id": "car_profile",
   "title": "Car profile",
   "description": "One place for the car's engine values and units: the redline, rev scale, cold rev limit, shift lights, warm-up and too-hot temperatures and the speed, distance, temperature, pressure, fuel use, torque and power units. M Vitals, Redline, Warm-Up, Virtual Dyno, Drag Timer, Brake Test, G-Force, eDrive and Transmission Config follow them; what is left to each app stays as each app has it",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "vendor": "custom",
   "loggingId": "OAA9",
   "iconGlyph": "profile",
