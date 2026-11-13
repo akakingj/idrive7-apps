@@ -11,6 +11,14 @@
  *            the values seen so far
  *   DEFAULTS the screens a new install starts with: made of car signals only, so they work on any car
  */
+// a unit drawn on its own: minutes as a plural row ("min|min": ko 분), as "min" alone is minimum in a catalog
+// (kit/i18n where the app runs; this module also loads on its own in the tests: then as it is)
+let i18n;
+const U = (u) => {
+    if (u !== 'min') return u;
+    if (i18n === undefined) { try { i18n = require('./kit/i18n'); } catch (e) { i18n = null; } }
+    return i18n ? i18n.plural(2, 'min', 'min') : u;
+};
 const LAYOUTS = [
     { id: 'dial2', name: 'Dial + 2 numbers', slots: ['dial', 'num', 'num'] },
     { id: 'dial3', name: 'Dial + 3 numbers', slots: ['dial', 'num', 'num', 'num'] },
@@ -150,13 +158,13 @@ const FULL = {
         const r = Math.max(60, Math.min(b.w / 2 - 40, (b.h - 70) / 2 - 8));
         G.radial(cv, t, b.x + b.w / 2, b.y + 60 + (b.h - 60) / 2, r, {
             value: valueOf(s), min: s.sc.min, max: s.sc.max, zones: s.sc.zones, decimals: s.d, peak: s.peak, showPeak: false,
-            unit: s.u, tickDiv: s.sc.div, tickDecimals: s.sc.div ? 0 : s.sc.max - s.sc.min < 5 ? 1 : 0, limit: s.sc.red,
+            unit: U(s.u), tickDiv: s.sc.div, tickDecimals: s.sc.div ? 0 : s.sc.max - s.sc.min < 5 ? 1 : 0, limit: s.sc.red,
         });
     },
     bar(cv, t, G, s, b, fit) {
         const step = G.niceStep(s.sc.max - s.sc.min, 8);
         G.segBar(cv, t, b.x, b.y, b.w, b.h, {
-            label: fit(cv, s.name, 26, b.w - 360, { font: 'bold' }), value: valueOf(s), unit: s.u, decimals: s.d, min: s.sc.min, max: s.sc.max,
+            label: fit(cv, s.name, 26, b.w - 360, { font: 'bold' }), value: valueOf(s), unit: U(s.u), decimals: s.d, min: s.sc.min, max: s.sc.max,
             step: step / 2, scale: { every: step, div: s.sc.div, decimals: s.sc.div ? 0 : step % 1 ? 1 : 0 }, peak: s.peak,
             ramp: 'hot', limit: s.sc.red !== undefined ? s.sc.red : s.sc.max,
         });
@@ -166,7 +174,7 @@ const FULL = {
         if (isNum(s.n)) {
             const h = (s.hist || []).filter(isNum), lo = h.length ? Math.min.apply(null, h) : null, hi = h.length ? Math.max.apply(null, h) : null;
             const sub = h.length > 2 && b.h > 150 ? 'last 5 min  ·  min ' + numText({ n: lo, d: s.d }) + '  max ' + numText({ n: hi, d: s.d }) : null;
-            G.stat(cv, t, b.x, b.y, b.w, b.h, { label: name, value: s.n, unit: s.u, decimals: s.d, history: s.hist, zones: s.sc && s.sc.zones, sub });
+            G.stat(cv, t, b.x, b.y, b.w, b.h, { label: name, value: s.n, unit: U(s.u), decimals: s.d, history: s.hist, zones: s.sc && s.sc.zones, sub });
             return;
         }
         G.panel(cv, t, b.x, b.y, b.w, b.h, name);
@@ -208,14 +216,14 @@ const SMALL = {
             value: valueOf(s), min: s.sc.min, max: s.sc.max, zones: s.sc.zones, decimals: s.d, peak: s.peak, showPeak: false,
             tickLabels: false, ticks: r < 60 ? 6 : 10, limit: s.sc.red,
         });
-        if (s.u) cv.text(s.u, cx, cy + Math.round(r * 0.62) * 0.32 + Math.max(14, r * 0.2), Math.max(12, Math.round(r * 0.17)), t.dim, { align: 'center' });
+        if (s.u) cv.text(U(s.u), cx, cy + Math.round(r * 0.62) * 0.32 + Math.max(14, r * 0.2), Math.max(12, Math.round(r * 0.17)), t.dim, { align: 'center' });
         label(cv, t, G, s.name, cx, cy + r * 0.92, b.w - 4, fit, 'center');
     },
     bar(cv, t, G, s, b, fit) {
         // the sport display bar, its label shortened to leave room for the value
-        const vw = cv.textWidth(isNum(s.n) ? numText(s) : '--', 44, { font: 'num' }) + (s.u ? cv.textWidth(' ' + s.u, 26) : 0);
+        const vw = cv.textWidth(isNum(s.n) ? numText(s) : '--', 44, { font: 'num' }) + (s.u ? cv.textWidth(' ' + U(s.u), 26) : 0);
         G.bar(cv, t, b.x, b.y + Math.max(0, (b.h - 92) / 2), b.w, 92, {
-            label: fit(cv, short(s.name).toUpperCase(), 22, (b.w - vw - 24) * 0.88, { font: 'bold' }), value: valueOf(s), unit: s.u, decimals: s.d,
+            label: fit(cv, short(s.name).toUpperCase(), 22, (b.w - vw - 24) * 0.88, { font: 'bold' }), value: valueOf(s), unit: U(s.u), decimals: s.d,
             min: s.sc.min, max: s.sc.max, niceMax: true, ramp: 'hot', peak: s.peak, zones: s.sc.zones,
         });
     },
