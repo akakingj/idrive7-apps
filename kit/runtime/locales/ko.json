@@ -36,6 +36,7 @@
   "Hazard red": "비상등 빨간색",
   "Turn glow": "방향지시등 조명",
   "Door red": "문 열림 빨강",
+  "Cannot open": "열 수 없음:",
   "Warm-up and too hot": "예열 · 과열",
   "Intake air (from the engine unit)": "흡기 온도 (엔진 ECU)",
   "INTAKE": "흡기",

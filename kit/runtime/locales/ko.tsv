@@ -38,6 +38,8 @@ TOOLS IN /var/opt	/var/opt 도구
 Hazard red	비상등 빨간색
 Turn glow	방향지시등 조명
 Door red	문 열림 빨강
+# Storage: a folder it can't open
+Cannot open	열 수 없음:
 # Car profile: warm-up and too hot in one panel
 Warm-up and too hot	예열 · 과열
 # Redline HUD: intake air, the tyre widget with the engine's warm-up (this fork)

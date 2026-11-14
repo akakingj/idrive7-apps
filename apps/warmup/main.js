@@ -135,7 +135,7 @@ mgu.run({
          */
         function gauge(cv, t, y, h, val, label, warm, hot) {
             const st = F() ? 18 : 10;
-            // (the oil's red from Oil is too hot at, where OIL HOT shows; the coolant's as before: 135)
+            // (red from the too-hot setting passed: the oil's where OIL HOT shows, the coolant's; 135 without one)
             const crit = G.isNum(hot) ? hot : 135, from = Math.min(120, crit - 5);
             G.segBar(cv, t, 24, y, 880, h, {
                 label, value: T(val), unit: tU(), decimals: 0, min: T(0), max: T(150), step: st, scale: { every: st * 2.5 },
@@ -199,14 +199,16 @@ mgu.run({
             const gb = gearT(d), warmG = settings.get('warmGearbox'), hasGb = G.isNum(gb);
             // (Settings / the Car profile: Oil is too hot at, Gearbox is too hot at - each gauge's red from there)
             const hotO = Number(settings.get('hotOil')) || 125, hotG = Number(settings.get('hotGearbox')) || GEAR_HOT;
+            // (the coolant's red from Coolant is too hot at: 135 as before, the Car profile's when it sets it, as M Vitals' and Redline's)
+            const hotC = Number(settings.get('hotCoolant')) || 135;
             if (hasGb) {
                 // three gauges in the room of two: the oil (what matters most) gets the extra room below the page
                 gaugeSmall(cv, t, G.TOP, 144 + half, d.oil, 'Engine oil', warm, hotO);
-                gaugeSmall(cv, t, G.TOP + 161 + half, 144, d.coolant, 'Coolant', warmC);
+                gaugeSmall(cv, t, G.TOP + 161 + half, 144, d.coolant, 'Coolant', warmC, hotC);
                 gaugeSmall(cv, t, G.TOP + 322 + half, 145 - half, gb, 'Gearbox oil', warmG, hotG);
             } else {
                 gauge(cv, t, G.TOP, 225 + half, d.oil, 'Engine oil', warm, hotO);
-                gauge(cv, t, G.TOP + 242 + half, 225 - half, d.coolant, 'Coolant', warmC);
+                gauge(cv, t, G.TOP + 242 + half, 225 - half, d.coolant, 'Coolant', warmC, hotC);
             }
 
             // ---- status panel

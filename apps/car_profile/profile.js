@@ -29,7 +29,7 @@ const FOLLOW = {
     warmGearbox: ['Warm-Up'],
     // too hot (red) from: each one at that temperature and above
     hotOil: ['M Vitals', 'Redline', 'Warm-Up', 'AK Cluster'],
-    hotCoolant: ['M Vitals', 'Redline', 'AK Cluster'],
+    hotCoolant: ['M Vitals', 'Redline', 'Warm-Up', 'AK Cluster'],
     hotGearbox: ['M Vitals', 'Redline', 'Warm-Up', 'AK Cluster'],
     speedUnit: ['M Vitals', 'Redline', 'Drag Timer', 'Brake Test', 'G-Force', 'AK Cluster'],
     distUnit: ['Brake Test', 'eDrive'],

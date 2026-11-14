@@ -2,7 +2,7 @@
   "id": "warmup",
   "title": "Warm-Up",
   "description": "Oil and coolant warm-up calculator (time to ready), safe rev limit and turbo cool-down",
-  "version": "1.8.5",
+  "version": "1.8.6",
   "vendor": "custom",
   "loggingId": "OA9A",
   "iconGlyph": "temp",
@@ -102,6 +102,17 @@
       "unitBy": "tempUnit",
       "units": { "f": { "unit": "°F", "mul": 1.8, "add": 32 } },
       "default": 125,
+      "steps": [110, 115, 120, 125, 130, 135, 140]
+    },
+    {
+      "key": "hotCoolant",
+      "profile": "hotCoolant",
+      "label": "Coolant is too hot at",
+      "type": "number",
+      "unit": "°C",
+      "unitBy": "tempUnit",
+      "units": { "f": { "unit": "°F", "mul": 1.8, "add": 32 } },
+      "default": 135,
       "steps": [110, 115, 120, 125, 130, 135, 140]
     },
     {

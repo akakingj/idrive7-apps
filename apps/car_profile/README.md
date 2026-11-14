@@ -15,7 +15,7 @@ One place for the car's engine values and units. Set them here once and the othe
 | Oil is warm at | Redline, Warm-Up, AK Cluster |
 | Coolant is warm at | Warm-Up |
 | Oil is too hot at | M Vitals (*Oil temp warning*), Redline (HUD and page), Warm-Up (*OIL HOT*), AK Cluster |
-| Coolant is too hot at | M Vitals (*Coolant temp warning*), Redline (HUD and page), AK Cluster |
+| Coolant is too hot at | M Vitals (*Coolant temp warning*), Redline (HUD and page), Warm-Up (the coolant gauge's red), AK Cluster |
 | Gearbox is too hot at | M Vitals (*Gearbox temp warning*), Redline HUD, Warm-Up (*GEARBOX HOT*), AK Cluster |
 | Speed unit | M Vitals, Redline, Drag Timer, Brake Test, G-Force, AK Cluster |
 | Distance unit | Brake Test (km -> metres, miles -> feet), eDrive |
