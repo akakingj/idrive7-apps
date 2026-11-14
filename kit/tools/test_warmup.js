@@ -137,6 +137,32 @@ const checks = [
         t = await render();
         assert(t.indexOf('GEARBOX READY IN') < 0 && t.indexOf('COOLANT READY IN') >= 0 && status(t) === 'READY', 'no gearbox: as before: ' + t.join(' | '));
     }],
+    ['gearbox oil warm-up from the Car profile (Gearbox oil is warm at, this fork): the kit\'s Settings, READY waits for it', async () => {
+        // the kit's own Settings class (cut from mgu.js as test_runtime.js does) reading a Car profile file
+        const src = fs.readFileSync(path.join(__dirname, '..', 'runtime', 'mgu.js'), 'utf8').replace(/\r\n/g, '\n');
+        const cls = src.match(/class Settings[\s\S]*?\n}\n/)[0];
+        const dd = fs.mkdtempSync(path.join(require('os').tmpdir(), 'warmup-prof-')), prof = path.join(dd, 'car-profile.json');
+        const was = process.env.MGU_CAR_PROFILE;
+        process.env.MGU_CAR_PROFILE = prof;
+        try {
+            fs.writeFileSync(prof, JSON.stringify({ v: 1, values: { warmGearbox: 70, hotGearbox: 110 } }));
+            const S = new Function('fs', 'path', 'DATA_DIR', 'log', cls + '\nreturn Settings;')(fs, path, dd, { warn() {}, error() {} });
+            const st = new S(SPEC.settings);
+            assert.strictEqual(st.get('warmGearbox'), 70, 'the profile\'s 70, not Warm-Up\'s own 60');
+            const status = (t) => t[t.findIndex((x) => / READY IN$/.test(x)) - 1];
+            gearC = 65;
+            await start({ warmGearbox: st.get('warmGearbox'), hotGearbox: st.get('hotGearbox') });
+            drive(GENTLE, 5);
+            assert.strictEqual(status(await render()), 'GEARBOX WARMING UP', '65 °C under the profile\'s 70: still warming up');
+            gearC = 72;
+            assert.strictEqual(status(await render()), 'READY', '72 °C: ready');
+            gearC = 110;
+            assert.strictEqual(status(await render()), 'GEARBOX HOT - EASE OFF', 'the profile\'s too hot at 110');
+            gearC = null;
+        } finally {
+            if (was === undefined) delete process.env.MGU_CAR_PROFILE; else process.env.MGU_CAR_PROFILE = was;
+        }
+    }],
     ['gearbox.js: the unit\'s 6000, else DA12 or the signal once they moved', async () => {
         const { Gearbox, Moving } = require(path.join(__dirname, '..', '..', 'apps', 'warmup', 'gearbox'));
         const m = new Moving(false);
