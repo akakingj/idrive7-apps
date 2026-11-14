@@ -2,10 +2,12 @@
   "id": "car_vitals",
   "title": "M Vitals",
   "description": "Live engine, thermal, intake / fuel / ignition, tyre and chassis gauges",
-  "version": "2.27.8",
+  "version": "2.27.9",
   "vendor": "custom",
   "loggingId": "OA93",
   "iconGlyph": "gauge",
+  "mguHmi": ["ID7", "ID8"],
+  "requires": { "idrive7-renderd": "2.1.18", "mgu-inputgate": "1.1.0" },
   "signals": {
     "de.bmw.infrastructure.VehicleCondition": { "_optional": "the car locked and left: no diagnostic request, so it can sleep (kit/diag.js)", "VehicleCondition": "s" },
     "de.bmw.infotainment.vehicle.CDS": {
@@ -229,6 +231,8 @@
       "label": "Max power (100% on sport display)",
       "type": "number",
       "unit": "kW",
+      "unitBy": "powerUnit",
+      "units": { "hp": { "unit": "hp", "mul": 1.34102 }, "ps": { "unit": "PS", "mul": 1.35962 } },
       "default": 215,
       "steps": [
         100,
@@ -338,6 +342,8 @@
       "label": "Oil temp warning",
       "type": "number",
       "unit": "°C",
+      "unitBy": "tempUnit",
+      "units": { "f": { "unit": "°F", "mul": 1.8, "add": 32 } },
       "default": 125,
       "steps": [110, 115, 120, 125, 130, 135, 140]
     },
@@ -347,6 +353,8 @@
       "label": "Coolant temp warning",
       "type": "number",
       "unit": "°C",
+      "unitBy": "tempUnit",
+      "units": { "f": { "unit": "°F", "mul": 1.8, "add": 32 } },
       "default": 112,
       "steps": [110, 112, 115, 120, 125, 130, 135, 140]
     },
@@ -356,6 +364,8 @@
       "label": "Gearbox temp warning",
       "type": "number",
       "unit": "°C",
+      "unitBy": "tempUnit",
+      "units": { "f": { "unit": "°F", "mul": 1.8, "add": 32 } },
       "default": 120,
       "steps": [80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130]
     },

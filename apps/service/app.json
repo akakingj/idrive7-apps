@@ -6,6 +6,8 @@
   "vendor": "custom",
   "loggingId": "OA96",
   "iconGlyph": "wrench",
+  "mguHmi": ["ID7", "ID8"],
+  "requires": { "idrive7-renderd": "2.1.15" },
   "signals": {
     "de.bmw.infrastructure.VehicleCondition": { "_optional": "the car locked and left: no diagnostic request, so it can sleep (kit/diag.js)", "VehicleCondition": "s" },
     "de.bmw.infotainment.KombiInterface_2": {

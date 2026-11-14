@@ -66,7 +66,10 @@
 #include "ivi-application-client-protocol.h"
 #include "ivi-controller-client-protocol.h"
 
-#define MAX_CLIENTS 16
+/* apps connected at once: ours and, on the community socket, IterioDev's (they connect there too while this renderer
+ * has it). 16 filled up on an iDrive 8 car with both sets installed (issue #152). A slot costs only while connected
+ * (pictures stay under GFX_IMG_ALL for all apps together); layer and surface ids are base + slot, 0x00-0x3f each. */
+#define MAX_CLIENTS 64
 #define MAX_MSG (24u << 20)
 #define MAX_IN (MAX_MSG + (1u << 17))  /* an app's input buffer: a whole MAX_MSG message, its header and some of the next */
 #define LAYER_BASE layer_base      /* "MR"; the community renderers use "MG", 0x4d470000 and 0x4d470100 */
@@ -786,8 +789,8 @@ void embed_frame_done(void) {
 
 void embed_changed(void) { update_all(); }
 
-/* the HMI's process id, or -1 */
-static int hmi_pid(void) {
+/* the process id of the HMI (name: cfg.hmi_process; with gate8, also Hmi8, iDrive 8's), or -1 */
+static int hmi_pid_any(int gate8) {
     DIR *d = opendir("/proc");
     if (!d) return -1;
     struct dirent *e;
@@ -800,11 +803,12 @@ static int hmi_pid(void) {
         if (!f) continue;
         if (fgets(name, sizeof name, f)) name[strcspn(name, "\n")] = 0;
         fclose(f);
-        if (!strcmp(name, cfg.hmi_process)) pid = atoi(e->d_name);
+        if (!strcmp(name, cfg.hmi_process) || (gate8 && !strcmp(name, "Hmi8"))) pid = atoi(e->d_name);
     }
     closedir(d);
     return pid;
 }
+static int hmi_pid(void) { return hmi_pid_any(0); }
 
 /* the HMI started after mgu-render-hmi.sh mounted the template (its marker) */
 static int template_loaded(void) {
@@ -896,7 +900,9 @@ static void touch_defaults(int area[4]) {
     if (cfg.touch_area[2]) { memcpy(area, cfg.touch_area, 4 * sizeof *area); return; }
     area[0] = area[1] = area[2] = area[3] = 0;
     if (screen_w == 2880 && screen_h == 960) { area[1] = 76; area[2] = 2880; area[3] = 764; }   /* iDrive 8: title strip, climate bar */
-    else if (screen_w == 1920 && screen_h == 720) { area[0] = 84; area[1] = 76; area[2] = 1836; area[3] = 644; }   /* iDrive 7: back column, title strip */
+    /* iDrive 7: right of the back column, the title strip included (the kit's page tabs are there; status icons are
+     * never claimed). The units used to pass this as touch_area; built in, the same unit serves iDrive 8 too. */
+    else if (screen_w == 1920 && screen_h == 720) { area[0] = 84; area[1] = 0; area[2] = 1836; area[3] = 720; }
 }
 
 /* ---------------- controller gate (upstream inputgate) ---------------- */
@@ -943,7 +949,7 @@ static void ccu_read(void) {
 
 /* the HMI runs with the controller gate library */
 static int ctl_gate_loaded(void) {
-    int pid = cfg.controller_lib[0] ? hmi_pid() : -1;
+    int pid = cfg.controller_lib[0] ? hmi_pid_any(1) : -1;      /* the gate goes into Hmi8 on iDrive 8 */
     if (pid < 0) return 0;
     char p[64], line[512];
     snprintf(p, sizeof p, "/proc/%d/maps", pid);
@@ -1688,6 +1694,47 @@ static void usage(const char *a0) {
     fprintf(stderr, "usage: %s [-c FILE] [-s key=value]... [-v] [--share | --unshare] | --replay FILE --out FILE.pam [--raw FILE.rgba] [--uid N]\n", a0);
 }
 
+/* IterioDev's renderer (his App Manager's service package, also as the Store's "mgu-renderd" tool): it binds the same
+ * community socket and uses the same ivi ids as this renderer, so the two cannot run together. Installed (its unit,
+ * started with "--socket"; this repository's installer writes a unit of the same name, with "-s socket_path=" and its
+ * marker line) or running (a mgu-renderd with "--socket"): why, else 0. */
+static int iterio_renderer(char *why, size_t n) {
+    static const char *units[] = { "/etc/systemd/system/mgu-renderd.service", "/run/systemd/system/mgu-renderd.service",
+                                   "/lib/systemd/system/mgu-renderd.service" };
+    for (size_t i = 0; i < sizeof units / sizeof *units; i++) {
+        FILE *f = fopen(units[i], "r");
+        if (!f) continue;
+        char line[1024]; int theirs = 0, ours = 0;
+        while (fgets(line, sizeof line, f)) {
+            if (strstr(line, "added by mgu-app-install.sh")) ours = 1;
+            if (!strncmp(line, "ExecStart=", 10) && strstr(line, " --socket")) theirs = 1;
+        }
+        fclose(f);
+        if (theirs && !ours) { snprintf(why, n, "its unit %s", units[i]); return 1; }
+    }
+    DIR *d = opendir("/proc");
+    struct dirent *e;
+    pid_t me = getpid();
+    while (d && (e = readdir(d))) {
+        char *end; long pid = strtol(e->d_name, &end, 10);
+        if (*end || pid <= 0 || pid == me) continue;
+        char p[64], b[1024]; snprintf(p, sizeof p, "/proc/%ld/cmdline", pid);
+        int fd = open(p, O_RDONLY | O_CLOEXEC);
+        if (fd < 0) continue;
+        ssize_t len = read(fd, b, sizeof b - 1);
+        close(fd);
+        if (len <= 0) continue;
+        b[len] = 0;
+        const char *base = strrchr(b, '/'); base = base ? base + 1 : b;
+        if (strcmp(base, "mgu-renderd")) continue;
+        for (char *a = b + strlen(b) + 1; a < b + len; a += strlen(a) + 1) {
+            if (!strcmp(a, "--socket")) { snprintf(why, n, "process %ld", pid); closedir(d); return 1; }
+        }
+    }
+    if (d) closedir(d);
+    return 0;
+}
+
 int main(int argc, char **argv) {
     const char *rin = NULL, *rout = "out.pam", *rraw = NULL;
     uint32_t ruid = (uint32_t)getuid();
@@ -1728,6 +1775,20 @@ int main(int argc, char **argv) {
 
     signal(SIGPIPE, SIG_IGN);
     signal(SIGTERM, on_sig); signal(SIGINT, on_sig);
+    /* on the community socket: stand down while IterioDev's renderer is installed or runs (its apps and ours then
+     * draw on it), looked at again every 30 s; nothing of ours (socket, touch divert, layers) is set up meanwhile */
+    if (!strcmp(cfg.socket_path, "/run/mgu-renderd/renderd.sock")) {
+        char why[128];
+        int said = 0;
+        while (!quit && iterio_renderer(why, sizeof why)) {
+            if (!said) log_warn("IterioDev's renderer is installed (%s): it has the apps' socket, this renderer stands down "
+                                "until it is removed", why);
+            said = 1;
+            sleep(30);
+        }
+        if (quit) return 0;
+        if (said) log_info("IterioDev's renderer is gone: starting");
+    }
     if (!getenv("XDG_RUNTIME_DIR")) setenv("XDG_RUNTIME_DIR", "/run/wayland", 1);
     dpy = wl_display_connect(cfg.wayland_display);
     if (!dpy) { log_error("cannot connect to the compositor %s (%s)", cfg.wayland_display, strerror(errno)); return 1; }
