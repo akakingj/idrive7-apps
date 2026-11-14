@@ -260,7 +260,7 @@ const STYLES = ['standard', 'minimal', 'wings', 'digital', 'vfd', 'vector', 'arc
  */
 const PROFILE_KEYS = ['hudStyle', 'hudPalette', 'hudGearFont', 'hudLabels', 'hudRpmFormat', 'hudUnlit', 'hudLightStyle',
     'hudShowBar', 'hudShowGear', 'hudShowMode', 'hudShowSpeed', 'hudShowRpm', 'hudBoost', 'hudShowTorque', 'hudShowPower', 'hudShowG', 'hudShowKnock',
-    'hudShowOil', 'hudShowWater', 'hudShowGearbox', 'hudShowOutside', 'hudShowLimit', 'hudTempsMode',
+    'hudShowOil', 'hudShowWater', 'hudShowGearbox', 'hudShowOutside', 'hudShowIntake', 'hudShowLimit', 'hudTempsMode',
     'hudShowTyres', 'hudShowFuel', 'hudShowBattSoc', 'hudShowBattVolt', 'hudShowHvSoc', 'hudShowHvPower', 'hudShowHvBar', 'hudShowHvTemp', 'hudShowHvVolt',
     'hudChip', 'hudKnockWarn', 'hudLaunch', 'hudPeak', 'hudShake',
     // size and place: a setup of its own can sit elsewhere (2026-11-10: a small one in a corner for Comfort)
@@ -374,6 +374,8 @@ function optsFrom(settings, drive) {
         // throttle: off until the accelerator pedal's scaling is checked on a car (readoutsFor keeps it)
         throttle: false, g: settings.get('hudShowG') === true,
         outside: settings.get('hudShowOutside') === true,
+        // intake air from the engine unit (intake.js), off unless switched on
+        intake: settings.get('hudShowIntake') === true,
         // tyres: the condensed readout (off unless switched on) in the unit set (Units, or the TYRES tab); the big
         // tyre widget is the directions' corner's (hud-tyres.js widgetOf)
         tyres: settings.get('hudShowTyres') === true,
@@ -445,7 +447,7 @@ function calmFor(drive, mode) {
 /** o (optsFrom) with only the shift lights, rev bar and gear left on (Comfort / Eco Pro on "lights"). */
 function calmOpts(o) {
     return Object.assign({}, o, { rpm: false, boost: false, torque: false, power: false, throttle: false, g: false, limit: false,
-        oil: false, coolant: false, gearbox: false, outside: false, tyres: false, fuel: false, soc12: false, volt12: false, hvSoc: false, hvPower: false, hvBar: false, hvTemp: false,
+        oil: false, coolant: false, gearbox: false, outside: false, intake: false, tyres: false, fuel: false, soc12: false, volt12: false, hvSoc: false, hvPower: false, hvBar: false, hvTemp: false,
         hvVolt: false, chip: 'off', peak: false, shake: false });
 }
 
@@ -453,6 +455,8 @@ function calmOpts(o) {
 const TEMPS = [['OIL', 'oil', { cold: 60, hot: 'hotOil', dflt: 130, warmOil: true }], ['WATER', 'coolant', { cold: 60, hot: 'hotCoolant', dflt: 112 }],
     ['GEARBOX', 'gearbox', { cold: 50, hot: 'hotGearbox', dflt: 120 }]];
 // boost in the unit chosen: bar (1 decimal), psi or kPa (whole numbers); temperatures in °C or °F
+// the coolant is warm from here (the WATER readout's cold band; the tyre widget's "Low or warming up")
+const COOLANT_WARM = 60;
 const BOOST_UNITS = { bar: [1, 1, 'BOOST'], psi: [14.5038, 0, 'BOOST PSI'], kpa: [100, 0, 'BOOST KPA'] };
 // torque from Nm: [factor, label, rounded to] (Nm and lb-ft to 5, kgm to 1); power from kW: [factor, label]
 const TORQUE_UNITS = { nm: [1, 'TORQUE', 5], lbft: [0.737562, 'LB-FT', 5], kgm: [1 / 9.80665, 'KGM', 1] };
@@ -473,7 +477,7 @@ function rpmItem(rpm, f) {
 const roundTo = (v, step) => Math.round(v / step) * step;
 /**
  * The readouts row for o (optsFrom): d (rpm, oil, coolant), gearbox temperature, boost (bar), sp
- * ({ rpm, cold }), x (the extras: torque Nm, pedal %, gLat / gLong g, outside °C, and electrical.js's
+ * ({ rpm, cold }), x (the extras: torque Nm, pedal %, gLat / gLong g, outside °C, intake °C, and electrical.js's
  * soc12 %, v12 V, hvSoc %, hvKw, hvTemp °C, hvVolt V; any may be null).
  * In the order of the switches; at most four. When more are on, the last plain ones give way first:
  * a cold, warming or hot temperature (and the cold limit) keeps its place.
@@ -523,6 +527,8 @@ function readoutsFor(d, gb, boost, sp, o, x) {
     });
     // outside: blue at 3 °C and below (ice is possible)
     if (o.outside && isNum(x.outside)) items.push({ label: 'OUTSIDE', value: Math.round(o.fahrenheit ? x.outside * 9 / 5 + 32 : x.outside) + '°', tone: x.outside <= 3 ? 'cold' : 'text' });
+    // intake air (the engine unit's, intake.js)
+    if (o.intake && isNum(x.intake)) items.push({ label: 'INTAKE', value: Math.round(o.fahrenheit ? x.intake * 9 / 5 + 32 : x.intake) + '°', tone: 'text' });
     // tyres: TYRES and the four pressures (hud-draw's 2x2 block), or the worst one where readouts are a label and a value
     if (o.tyres) { const ty = TyresMod.readout(x.tyres, o.tyreUnit); if (ty) items.push(ty); }
     electricalItems(o, x).forEach((it) => items.push(it));
@@ -768,7 +774,13 @@ function start(ctx, src) {
         const ty = src.tyres ? src.tyres.value() : null;
         const low = TyresMod.lowCorners(ty).join(',');
         if (low !== tyreLowLogged) { if (low) log.info('hud: low tyre ' + low + (w.show !== 'off' ? ': the tyre widget shows' : '')); tyreLowLogged = low; }
-        return HudTyres.widgetShows(w, ty) ? { ty: ty, w: w } : null;
+        return HudTyres.widgetShows(w, ty, engineWarming()) ? { ty: ty, w: w } : null;
+    };
+    /** The engine still warming up: the oil under "Oil is warm at" (the Car profile's) or the coolant cold (under 60 °C, the
+     *  WATER readout's blue); without either temperature, not (the widget then only for a low tyre). */
+    const engineWarming = () => {
+        const d = src.data ? src.data() : {}, warmOil = numOf(settings, 'warmOil', 80);
+        return (isNum(d.oil) && d.oil < warmOil) || (isNum(d.coolant) && d.coolant < COOLANT_WARM);
     };
     const drawNavLayer = (m, tv) => {
         corner = m ? 'nav' : tv ? 'tyres' : '';
@@ -840,7 +852,7 @@ function start(ctx, src) {
     // does only that, then stops): a plug-in hybrid's Hybrid / Electric modes count as Comfort, hidden by default, so
     // without it a hybrid would only be found in Sport (2026-11-10 review)
     const stopReads = (probe) => {
-        [src.gearbox, src.knock, src.fuel].forEach((r) => { if (r) r.stop(); });
+        [src.gearbox, src.knock, src.fuel, src.intake].forEach((r) => { if (r) r.stop(); });
         if (src.electrical) { if (probe) src.electrical.start({}); else src.electrical.stop(); }
     };
     const stopTimer = () => { if (timer) clearInterval(timer); timer = null; stopReads(); };
@@ -926,7 +938,8 @@ function start(ctx, src) {
     /*
      * The readouts row, left to right: rpm, boost (once the car has sent a moving value), torque,
      * power, throttle, g, the cold-engine shift limit (while the cold guard holds the shift point
-     * down), then oil, water, gearbox and outside (readoutsFor).
+     * down), then oil, water, gearbox, outside and intake (readoutsFor). Boost: the sport display's, else the
+     * engine unit's (intake.js).
      * Temperatures "smart": only one that is cold, warming (oil under "Oil warm at") or hot. Four at most.
      */
     const ro = { t: 0, v: [], o: null };
@@ -1136,6 +1149,11 @@ function start(ctx, src) {
         if (src.knock) { const run = isNum(src.data().rpm) && src.data().rpm > 400; if ((oNow.knock || oNow.knockWarn) && run) src.knock.start(); else src.knock.stop(); }
         // and its fuel rate only while the fuel readout is on and the engine runs
         if (src.fuel) { const run = isNum(src.data().rpm) && src.data().rpm > 400; if (oNow.fuel && run) src.fuel.start(); else src.fuel.stop(); }
+        // and its boost (only where the sport display sends none) and intake air, while their readouts are on and it runs
+        if (src.intake) {
+            const run = isNum(src.data().rpm) && src.data().rpm > 400;
+            src.intake.start({ boost: run && oNow.boost && !(src.boostCar && src.boostCar()), iat: run && oNow.intake });
+        }
         const f = frameData();
         // the same inputs draw the same frame: skip it (idle, a steady cruise, no rpm)
         const key = frameKey(f);

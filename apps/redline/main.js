@@ -56,6 +56,7 @@ const HudDraw = require('./hud-draw');
 const GearboxTemp = require('./gearbox');
 const KnockWatch = require('./knock');
 const FuelWatch = require('./fuel');
+const IntakeWatch = require('./intake');
 const PowerLog = require('./powerlog');
 const Electrical = require('./electrical');
 const Tyres = require('./tyres');
@@ -120,6 +121,9 @@ mgu.run({
         const knock = new KnockWatch(ctx, () => gearbox.diag());
         // fuel use from the engine unit, the same link; polled only while the fuel readout is on and the engine runs
         const fuel = new FuelWatch(ctx, () => gearbox.diag(), { diesel: () => engine.profile() === 'diesel' });
+        // boost (where the sport display sends none) and intake air from the engine unit, the same link; read only while
+        // a HUD readout wants them and the engine runs
+        const intake = new IntakeWatch(ctx, () => gearbox.diag());
         // 12 V and hybrid battery from the car (signals, and read-only UDS on the same link); hybrid ones only on a hybrid
         const electrical = new Electrical(ctx, () => gearbox.diag());
         // tyre pressures, targets and temperatures from the car's own signals (no requests to any unit)
@@ -715,7 +719,7 @@ mgu.run({
                 cv.target(tx - 16, 362, w + 32, 40, () => { studio.panel = pn[0]; return render(); }, 'studio_tab_' + pn[0]);
                 tx += w + 48;
             });
-            const nOn = [o.speed, o.rpm && o.style !== 'digital' && o.style !== 'vfd', o.boost, o.torque, o.power, o.g, o.knock, o.fuel, o.oil, o.coolant, o.gearbox, o.outside, o.tyres,
+            const nOn = [o.speed, o.rpm && o.style !== 'digital' && o.style !== 'vfd', o.boost, o.torque, o.power, o.g, o.knock, o.fuel, o.oil, o.coolant, o.gearbox, o.outside, o.intake, o.tyres,
                 o.soc12, o.volt12, o.hvSoc, o.hvPower, o.hvBar, o.hvTemp, o.hvVolt].filter(Boolean).length;
             // the power bar takes no place in the row on the layouts that draw it along their gauge (2026-11-10 review)
             const over = studio.panel === 'readouts' && nOn - (o.hvBar && Hud.METER_STYLES.indexOf(o.style) >= 0 ? 1 : 0) > Hud.MAX_READOUTS;
@@ -779,6 +783,7 @@ mgu.run({
                     ['Water', o.coolant, () => P.set('hudShowWater', !o.coolant)],
                     ['Gearbox', o.gearbox, () => P.set('hudShowGearbox', !o.gearbox)],
                     ['Outside', o.outside, () => P.set('hudShowOutside', !o.outside)],
+                    ['Intake', o.intake, () => P.set('hudShowIntake', !o.intake)],
                     ['Cold limit', o.limit, () => P.set('hudShowLimit', !o.limit)],
                     ['Only when cold or hot', o.smartTemps, () => P.set('hudTempsMode', o.smartTemps ? 'always' : 'smart')],
                 ]);
@@ -1126,7 +1131,7 @@ mgu.run({
         hud = Hud.start(ctx, {
             // the next turn and lanes while a route runs (null: none here)
             nav: nav,
-            data: () => car.data(), shiftPoint, redline, maxRpm, gearbox, knock, fuel, electrical, tyres, downshift,
+            data: () => car.data(), shiftPoint, redline, maxRpm, gearbox, knock, fuel, intake, electrical, tyres, downshift,
             // the tach's peak marker (drops back after "Peak hold"), the last upshift's grade for 1.5 s,
             // boost once it has moved and is under 2 s old (none from the demo drive)
             peak: () => peakRpm,
@@ -1135,12 +1140,15 @@ mgu.run({
             launch: (now, mph) => launch.last(now, mph),
             // 'sport', 'comfort', 'eco', 'hybrid' or null (unknown, the demo data): the HUD shows as set up
             driveMode: () => (car.data().demo ? null : driveMode.v),
-            boost: () => (boost.moved && Date.now() - boost.t < 2000 && !car.data().demo ? boost.v : null),
+            // (the sport display's; where it sends none or a constant, the engine unit's: intake.js)
+            boostCar: () => boost.moved && Date.now() - boost.t < 2000,
+            boost: () => (car.data().demo ? null : boost.moved && Date.now() - boost.t < 2000 ? boost.v : intake.value().boost),
             // torque, pedal, g, outside for the extra readouts (none from the demo data)
             extras: () => (car.data().demo ? null : Object.assign(electrical.value(), { tyres: tyres.value() }, {
                 torque: Date.now() - torque.t < 2000 ? torque.v : null,
                 gLat: fresh(extra.gLat, 2000), gLong: fresh(extra.gLong, 2000),
                 outside: fresh(extra.outside, 600000),
+                intake: intake.value().iat,
                 knock: knock.value().retard,
                 // the engine off (electric driving, auto start-stop) uses no fuel: 0, once the engine unit has given
                 // a rate this run, rather than the readout dropping out (2026-11-10 review)

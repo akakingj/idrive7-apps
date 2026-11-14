@@ -58,6 +58,7 @@ jobs:
       - run: node kit/tools/test_car_profile.js
       - run: node kit/tools/test_parked_diag.js
       - run: node kit/tools/test_ambient_boot.js
+      - run: node kit/tools/test_redline_intake.js
       - run: node kit/tools/test_mgu_storage.js
       - run: node kit/tools/test_edrive.js
       - run: node kit/tools/test_fastkw.js
@@ -114,6 +115,7 @@ jobs:
           node-version: '8.16.2'
       - run: node --version
       - run: node kit/tools/test_redline_hud.js
+      - run: node kit/tools/test_redline_intake.js
       - run: node kit/tools/test_hud_claim.js
       - run: node kit/tools/test_redline_running.js
       - run: node kit/tools/test_redline_navlog.js

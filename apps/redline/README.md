@@ -289,7 +289,7 @@ below list them by what they do.
 | Fuel use (experimental) | off (default) / on: the engine's fuel use, per 100 km while moving, per hour when stopped ([Fuel use](#fuel-use)) |
 | Fuel use unit | l/100 km (default) / mpg (UK) / mpg (US) / km/l |
 | Tyres | off (default) / on: TYRES over the four pressures in a 2x2 block (front over rear), each coloured against its target; on Arc, Ramp and Dial the worst tyre (TYRE RR 2.1) ([Tyres](#tyres)) |
-| Tyre widget | when a tyre is low (default) / low or warming up / always / off: the four tyres in the directions' corner, when they have no turn ([Tyres](#tyres)) |
+| Tyre widget | when a tyre is low (default) / low or the engine warming up / always / off: the four tyres in the directions' corner, when they have no turn ([Tyres](#tyres)) |
 | Tyre widget: the car, tyre temperatures | on (default) / off each |
 | Tyre widget: each tyre's target | off (default) / on: the target pressure small after each pressure, as "/2.5" |
 | 12 V battery charge, 12 V battery voltage | off (default) / on each, on every car ([Electrical](#electrical)) |
@@ -635,8 +635,9 @@ green from 40 °C; orange and red when it runs hot, as above. The temperature un
 it until the tyre is warm. The sensors measure the air in the tyre, which runs cooler than the tread.
 
 It shows **when a tyre is low** (the default: red, under 85 % of its target; it goes when the tyre is
-pumped up), **when low or warming up** (for a track day: up while any tyre is under 40 °C, gone once all
-four are warm), **always**, or **never**. Set it up on *HUD looks → TYRES*; its corner moves with *MOVE*
+pumped up), **when low or the engine warming up** (this fork: up while the oil is under *Oil is warm at* or the
+coolant under 60 °C, gone once the engine is warm; the tyres' own 40 °C, which a road drive in the cold may
+never reach, only where the engine's temperatures are not known), **always**, or **never**. Set it up on *HUD looks → TYRES*; its corner moves with *MOVE*
 there, which moves the directions too (*Directions left / right*, *up / down*). The TYRES tab, the Tyres
 readout switch and these settings show only once the car has sent a tyre pressure, so a car without
 tyre data never sees them. Logged `hud: low tyre RR: the tyre widget shows`.

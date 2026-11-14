@@ -40,6 +40,7 @@ const NOT_ON = {
     hudShowWater: { layouts: ['minimal', 'wings'], why: 'no readouts row' },
     hudShowGearbox: { layouts: ['minimal', 'wings'], why: 'no readouts row' },
     hudShowOutside: { layouts: ['minimal', 'wings'], why: 'no readouts row' },
+    hudShowIntake: { layouts: ['minimal', 'wings'], why: 'no readouts row' },
     hudShowKnock: { layouts: ['minimal', 'wings'], why: 'no readouts row' },
     hudShowLimit: { layouts: ['minimal', 'wings'], why: 'no readouts row' },
     hudShowTyres: { layouts: ['minimal', 'wings'], why: 'no readouts row' },
@@ -64,7 +65,7 @@ const D = { rpm: 5637, gear: 3, stage: 'D', oil: 95, coolant: 90 };
 // (the electrical values too: a plug-in hybrid; test_redline_hud.js checks a petrol car shows none of the hybrid ones)
 // the tyres (as the demo has them: one a little under its target, one well under)
 const TY = Hud.demoAt(0).tyres;
-const X = { tyres: TY, torque: 400, gLat: 0.4, gLong: 0.3, outside: 2, pedal: 60, knock: 3, soc12: 82, v12: 14.2, hvSoc: 64, hvKw: -18, hvTemp: 27, hvVolt: 352, fuelLph: 9.6, kmh: 80 };
+const X = { tyres: TY, torque: 400, gLat: 0.4, gLong: 0.3, outside: 2, intake: 31, pedal: 60, knock: 3, soc12: 82, v12: 14.2, hvSoc: 64, hvKw: -18, hvTemp: 27, hvVolt: 352, fuelLph: 9.6, kmh: 80 };
 function picture(over, style, state) {
     const settings = { get: (k) => (k in over ? over[k] : def[k]) };
     const o = Object.assign({}, Hud.optsFrom(settings), { style: style });
@@ -92,7 +93,7 @@ const ALONE = {
     hudShowRpm: { hudShowRpm: true }, hudRpmFormat: { hudShowRpm: true }, hudBoost: { hudBoost: true }, hudBoostUnit: { hudBoost: true }, hudLabels: { hudBoost: true },
     hudShowSpeed: {}, hudShowTorque: {}, hudShowPower: {}, hudShowG: {}, hudTorqueUnit: { hudShowTorque: true }, hudPowerUnit: { hudShowPower: true },
     hudShowOil: { hudShowOil: true }, hudShowWater: { hudShowWater: true }, hudShowGearbox: { hudShowGearbox: true }, hudTempUnit: { hudShowOil: true },
-    hudShowOutside: {}, hudShowLimit: { hudShowLimit: true }, hudTempsMode: { hudShowOil: true, hudTempsMode: 'smart' }, hudShowKnock: {},
+    hudShowOutside: {}, hudShowIntake: {}, hudShowLimit: { hudShowLimit: true }, hudTempsMode: { hudShowOil: true, hudTempsMode: 'smart' }, hudShowKnock: {},
     hudShowTyres: {}, hudTyreUnit: { hudShowTyres: true },
     hudShowBattSoc: {}, hudShowBattVolt: {}, hudShowHvSoc: HY, hudShowHvPower: HY, hudShowHvTemp: HY, hudShowHvVolt: HY,
     hudShowHvBar: HY, hudShowFuel: {}, hudFuelUnit: { hudShowFuel: true },

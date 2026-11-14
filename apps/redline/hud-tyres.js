@@ -51,8 +51,8 @@ function coldCorners(ty) {
 
 /**
  * The widget's options from the settings: { show ('low' | 'warm' | 'always' | 'off'), car, target, temp, unit,
- * fahrenheit }. show 'low': only while a tyre is well under its target (red); 'warm': that, and while a tyre
- * is still warming up (for a track day: it goes once all four are warm).
+ * fahrenheit }. show 'low': only while a tyre is well under its target (red); 'warm': that, and while the engine
+ * warms up (widgetShows; without the engine's temperatures, while a tyre is still warming up).
  */
 function widgetOf(settings) {
     const s = settings.get('hudTyreWidget');
@@ -64,10 +64,17 @@ function widgetOf(settings) {
     };
 }
 
-/** Whether the widget shows for these tyres (null: no data, never). */
-function widgetShows(w, ty) {
+/**
+ * Whether the widget shows for these tyres (null: no data, never). engineWarming (this fork; hud.js passes it): true
+ * while the engine warms up (oil under "Oil is warm at", or the coolant cold): "Low or warming up" then goes with the
+ * engine's warm-up, not the tyres' own 40 °C, which a road drive in the cold may never reach (2026-11-14: it stayed
+ * up long after the oil and coolant were warm). Without it (undefined), the tyres' own warm-up as before.
+ */
+function widgetShows(w, ty, engineWarming) {
     if (!ty || w.show === 'off') return false;
-    return w.show === 'always' || Tyres.lowCorners(ty).length > 0 || (w.show === 'warm' && coldCorners(ty).length > 0);
+    if (w.show === 'always' || Tyres.lowCorners(ty).length > 0) return true;
+    if (w.show !== 'warm') return false;
+    return typeof engineWarming === 'boolean' ? engineWarming : coldCorners(ty).length > 0;
 }
 
 /** Everything the picture depends on (the numbers as drawn). */
