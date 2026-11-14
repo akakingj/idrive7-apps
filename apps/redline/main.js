@@ -779,9 +779,9 @@ mgu.run({
                     ['Fuel', o.fuel, () => P.set('hudShowFuel', !o.fuel)],
                 ].concat(tyres.seen() ? [['Tyres', o.tyres, () => P.set('hudShowTyres', !o.tyres)]] : []));
                 switches(cv, t, R2, 'TEMPS', [
-                    ['Oil', o.oil, () => P.set('hudShowOil', !o.oil)],
+                    ['Engine oil', o.oil, () => P.set('hudShowOil', !o.oil)],
                     ['Water', o.coolant, () => P.set('hudShowWater', !o.coolant)],
-                    ['Gearbox', o.gearbox, () => P.set('hudShowGearbox', !o.gearbox)],
+                    ['Gearbox oil', o.gearbox, () => P.set('hudShowGearbox', !o.gearbox)],
                     ['Outside', o.outside, () => P.set('hudShowOutside', !o.outside)],
                     ['Intake', o.intake, () => P.set('hudShowIntake', !o.intake)],
                     ['Cold limit', o.limit, () => P.set('hudShowLimit', !o.limit)],

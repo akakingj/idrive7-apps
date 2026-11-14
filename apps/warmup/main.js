@@ -201,11 +201,11 @@ mgu.run({
             const hotO = Number(settings.get('hotOil')) || 125, hotG = Number(settings.get('hotGearbox')) || GEAR_HOT;
             if (hasGb) {
                 // three gauges in the room of two: the oil (what matters most) gets the extra room below the page
-                gaugeSmall(cv, t, G.TOP, 144 + half, d.oil, 'Oil', warm, hotO);
+                gaugeSmall(cv, t, G.TOP, 144 + half, d.oil, 'Engine oil', warm, hotO);
                 gaugeSmall(cv, t, G.TOP + 161 + half, 144, d.coolant, 'Coolant', warmC);
                 gaugeSmall(cv, t, G.TOP + 322 + half, 145 - half, gb, 'Gearbox oil', warmG, hotG);
             } else {
-                gauge(cv, t, G.TOP, 225 + half, d.oil, 'Oil', warm, hotO);
+                gauge(cv, t, G.TOP, 225 + half, d.oil, 'Engine oil', warm, hotO);
                 gauge(cv, t, G.TOP + 242 + half, 225 - half, d.coolant, 'Coolant', warmC);
             }
 
