@@ -56,3 +56,4 @@ jobs:
       - run: node kit/tools/test_diag_options.js
       - run: node kit/tools/test_diag_replies.js
       - run: node kit/tools/test_live_data.js
+# ci check of e2338d9 (throwaway branch)
