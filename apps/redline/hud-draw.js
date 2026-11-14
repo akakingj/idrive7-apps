@@ -303,6 +303,11 @@ function drawReadouts(cv, x0, x1, y, items, P, layer, clear) {
     items = items.filter((it) => !it.bar);
     if (!items.length) return;
     const n = items.length, colw = (x1 - x0) / Math.max(3, n), k = Math.min(1, colw / 70);
+    // the labels' size: one for the whole row (2026-11-14: a long label, 엔진오일 or 미션오일 beside 외기, came out
+    // smaller than its neighbours), the largest at which every label fits its column, 4 px apart
+    const lo = { align: 'center', font: 'bold', spacing: (clear ? 1.5 : 1.2) * k };
+    const labelOf = (it) => (it.tyres && it.tyres.length === 4 && colw >= 56 ? it.block : it.label);
+    const ls = items.reduce((m, it) => Math.min(m, Theme.fitSize(cv, labelOf(it), (clear ? 18 : 14) * k, colw - 4, lo)), (clear ? 18 : 14) * k);
     items.forEach((it, i) => {
         const cx = x0 + colw * (i + 0.5);
         // labels: Normal 14 px nearly full brightness, Clearer 18 px full (12 px at 75 % read as specks on the
@@ -311,11 +316,7 @@ function drawReadouts(cv, x0, x1, y, items, P, layer, clear) {
         // them (56 px and up: four readouts in the row's 250 px leave 62); else the worst tyre as label and value
         const block = it.tyres && it.tyres.length === 4 && colw >= 56;
         const label = block ? it.block : it.label;
-        if (layer !== 'fg') {
-            const lo = { align: 'center', font: 'bold', spacing: (clear ? 1.5 : 1.2) * k };
-            const s = Theme.fitSize(cv, label, (clear ? 18 : 14) * k, colw - 14, lo);
-            cv.text(label, cx, y + (clear ? 15 : 13), s, clear ? P.text : withAlpha(P.text, 0.9), lo);
-        }
+        if (layer !== 'fg') cv.text(label, cx, y + (clear ? 15 : 13), ls, clear ? P.text : withAlpha(P.text, 0.9), lo);
         if (layer === 'bg') return;
         if (block) {
             const dx = Math.min(colw / 4, 22), vs = 17, top = y + (clear ? 34 : 32);

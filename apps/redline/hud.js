@@ -592,6 +592,13 @@ function demoAt(tMs) {
     const pull = r.down || t >= 8.6 ? 0 : t >= 7.6 ? 0.3 : 1;
     r.pedal = pull * 100; r.torque = pull ? 180 + 220 * clamp(r.boost / 1.3, 0, 1) : 0;
     r.gLong = r.down ? -0.85 : pull * 0.45; r.gLat = 0.1; r.outside = 14;
+    // the rest of the readouts, so each one switched on shows in the preview (this fork): the intake air warming
+    // under load, knock control taking a little on the limiter, the fuel use, the 12 V and a hybrid's battery
+    r.intake = Math.round(32 + 12 * pull);
+    r.knock = t >= 4.8 && t < 5.6 ? 1.5 : 0;
+    r.fuelLph = 3 + 37 * pull * clamp(r.rpm / 6500, 0, 1);
+    r.soc12 = 86; r.v12 = 14.4;
+    r.hvSoc = 62; r.hvKw = r.down ? -28 : Math.round(55 * pull); r.hvTemp = 29; r.hvVolt = 356;
     // the speed from the gear and revs (km/h per 1000 rpm, an 8-speed's 2nd to 4th)
     r.kmh = r.rpm / 1000 * ({ 2: 13.6, 3: 20.6, 4: 27 }[r.gear] || 20);
     // tyres for the previews: front right of target, rear left a little under, rear right well under

@@ -34,6 +34,8 @@ No file systems found	파일 시스템 없음
 Press Refresh to measure	새로고침을 눌러 측정
 READ-ONLY	읽기 전용
 TOOLS IN /var/opt	/var/opt 도구
+# Car profile: warm-up and too hot in one panel
+Warm-up and too hot	예열 · 과열
 # Redline HUD: intake air, the tyre widget with the engine's warm-up (this fork)
 Intake air (from the engine unit)	흡기 온도 (엔진 ECU)
 INTAKE	흡기
